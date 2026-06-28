@@ -1,6 +1,6 @@
 {
-  "name": "DeskEase",
-  "description": "A clean, minimalist full-screen solid black canvas featuring DeskEase.",
+  "name": "Blank.finder",
+  "description": "Be the first to find untapped leads in your region. Secure your spot now.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
