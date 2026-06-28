@@ -1,0 +1,6 @@
+{
+  "name": "DeskEase",
+  "description": "A clean, minimalist full-screen solid black canvas featuring DeskEase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
