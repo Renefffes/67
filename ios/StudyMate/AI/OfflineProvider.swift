@@ -39,15 +39,29 @@ struct OfflineProvider: StudyAIProvider {
             cards = [GeneratedCard(front: "Summarize \(name)", back: summary.isEmpty ? "(empty notes)" : String(summary.prefix(300)))]
         }
 
-        let fallbackPool = keywords(in: notes, limit: 20)
+        let fallbackPool = keywords(in: notes, limit: 30)
         var quiz: [GeneratedQuestion] = []
         for (index, card) in cards.prefix(maxQuestions).enumerated() {
             let isCloze = !definitionCards.contains(index)
-            let others = cards.enumerated()
-                .filter { $0.offset != index && definitionCards.contains($0.offset) != isCloze }
-                .map(\.element.back)
+            let seed = stableHash(card.front)
+            let others = rotated(
+                cards.enumerated()
+                    .filter { $0.offset != index && definitionCards.contains($0.offset) != isCloze }
+                    .map(\.element.back),
+                by: seed
+            )
+            // Definitions only compete with other definitions: single keywords next to a full
+            // definition give the answer away. Blanks get keywords that are not already in the
+            // sentence, with the answer's look (number, capitalized, lowercase) first.
+            var candidates = others
+            if isCloze {
+                let questionWords = Set(words(in: card.front.lowercased()))
+                let pool = (others + rotated(fallbackPool, by: seed)).filter { !questionWords.contains($0.lowercased()) }
+                let shape = wordShape(card.back)
+                candidates = pool.filter { wordShape($0) == shape } + pool.filter { wordShape($0) != shape }
+            }
             var distractors: [String] = []
-            for candidate in others + fallbackPool where distractors.count < 3 {
+            for candidate in candidates where distractors.count < 3 {
                 let lower = candidate.lowercased()
                 if lower != card.back.lowercased() && !distractors.contains(where: { $0.lowercased() == lower }) {
                     distractors.append(candidate)
@@ -57,7 +71,9 @@ struct OfflineProvider: StudyAIProvider {
             var options = distractors
             let answerIndex = stableHash(card.front) % (options.count + 1)
             options.insert(card.back, at: answerIndex)
-            let question = isCloze ? "Fill in the blank: \(card.front)" : card.front
+            let question = isCloze
+                ? "Fill in the blank: \(card.front)"
+                : card.front.hasSuffix("?") ? card.front : "What does “\(card.front)” mean?"
             quiz.append(GeneratedQuestion(
                 question: question,
                 options: options,
@@ -140,6 +156,17 @@ struct OfflineProvider: StudyAIProvider {
 
     private static func stripBullet(_ line: String) -> String {
         line.replacingOccurrences(of: #"^([-•*·]|\d+[.)])\s*"#, with: "", options: .regularExpression)
+    }
+
+    private static func rotated(_ items: [String], by seed: Int) -> [String] {
+        guard !items.isEmpty else { return items }
+        let start = seed % items.count
+        return Array(items[start...] + items[..<start])
+    }
+
+    private static func wordShape(_ word: String) -> Int {
+        guard let first = word.first else { return 0 }
+        return first.isNumber ? 1 : first.isUppercase ? 2 : 3
     }
 
     static func stableHash(_ text: String) -> Int {
