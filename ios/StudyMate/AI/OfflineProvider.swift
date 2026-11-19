@@ -189,7 +189,8 @@ struct OfflineProvider: StudyAIProvider {
         let topic = index.label(for: previous ?? query)
 
         if wantsMore(lower) {
-            let pool = ranked.isEmpty ? all : ranked
+            let related = index.rank(query, minShare: 0)
+            let pool = related.isEmpty ? all : related
             let more = pool.filter { !alreadySaid.contains($0) }.prefix(3)
             if !more.isEmpty {
                 return "Here's more from your notes\(topic.map { " about \($0)" } ?? ""):\n" + bullets(more)
@@ -359,13 +360,13 @@ struct OfflineProvider: StudyAIProvider {
             weights = frequency.mapValues { log((count + 1) / Double($0)) + 0.1 }
         }
 
-        func rank(_ query: Set<String>) -> [String] {
+        func rank(_ query: Set<String>, minShare: Double = 0.5) -> [String] {
             let scored = sentences.indices
                 .map { (index: $0, score: words[$0].intersection(query).reduce(0) { $0 + (weights[$1] ?? 0) }) }
                 .filter { $0.score > 0 }
             guard let best = scored.map(\.score).max() else { return [] }
             return scored
-                .filter { $0.score >= best * 0.5 }
+                .filter { $0.score >= best * minShare }
                 .sorted { $0.score > $1.score || ($0.score == $1.score && $0.index < $1.index) }
                 .map { sentences[$0.index] }
         }
