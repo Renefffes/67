@@ -253,8 +253,7 @@ struct OfflineProvider: StudyAIProvider {
         let expected = answerWords(card.back)
         let given = answerWords(answer)
         let matched = expected.filter { word in given.contains { isWordForm($0, of: word) } }.count
-        let decimalCommas = answer.replacingOccurrences(of: #"(?<=[0-9]),(?=[0-9])"#, with: ".", options: .regularExpression)
-        let numbersMatch = numbers(in: card.back).isSubset(of: numbers(in: answer).union(numbers(in: decimalCommas)))
+        let numbersMatch = numbers(in: decimalCommas(card.back)).isSubset(of: numbers(in: answer).union(numbers(in: decimalCommas(answer))))
         let correct = expected.isEmpty
             ? answer.lowercased().contains(card.back.lowercased())
             : numbersMatch && matched * 2 >= expected.count
@@ -266,6 +265,11 @@ struct OfflineProvider: StudyAIProvider {
     /// Keeps short tokens such as chemical symbols ("Fe") and numbers, unlike `contentWords`.
     private static func answerWords(_ text: String) -> Set<String> {
         Set(words(in: text.lowercased()).filter { !stopWords.contains($0) })
+    }
+
+    /// Reads a lone comma inside a number as a decimal ("9,81" is 9.81) but leaves lists such as "2,3,5" alone.
+    private static func decimalCommas(_ text: String) -> String {
+        text.replacingOccurrences(of: #"(?<![0-9,])([0-9]+),([0-9]+)(?!,?[0-9])"#, with: "$1.$2", options: .regularExpression)
     }
 
     /// Whole numbers as written, so "9.82" is not "9.81" and "40" is not "-40"; the dash in "1939-1945" is a range, not a sign.

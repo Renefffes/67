@@ -154,6 +154,9 @@ final class OfflineProviderTests: XCTestCase {
         let primes = GeneratedCard(front: "First three primes?", back: "2,3,5")
         XCTAssertTrue(OfflineProvider.grade(answer: "2, 3, 5", card: primes).hasPrefix("Correct!"))
         XCTAssertTrue(OfflineProvider.grade(answer: "9,81", card: g).hasPrefix("Correct!"))
+        let dutch = GeneratedCard(front: "Wat is g op aarde?", back: "9,81 m/s²")
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.81", card: dutch).hasPrefix("Correct!"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "9 and 81", card: dutch).hasPrefix("Not quite"))
         let mitosis = GeneratedCard(front: "What does mitosis do?", back: "divides cells")
         XCTAssertTrue(OfflineProvider.grade(answer: "it divided the cell", card: mitosis).hasPrefix("Correct!"))
     }
