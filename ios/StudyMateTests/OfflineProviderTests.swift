@@ -392,4 +392,9 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(OfflineProvider.grade(answer: "-40 degrees", card: card).hasPrefix("Correct!"))
         XCTAssertFalse(OfflineProvider.grade(answer: "40 degrees", card: card).hasPrefix("Correct!"))
     }
+
+    func testDecimalCommaAfterWordComma() {
+        let card = GeneratedCard(front: "What is g?", back: "On Earth, 9,81 m/s²")
+        XCTAssertTrue(OfflineProvider.grade(answer: "On Earth, 9.81 m/s²", card: card).hasPrefix("Correct!"))
+    }
 }
