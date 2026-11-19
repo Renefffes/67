@@ -196,10 +196,12 @@ struct FlashcardStudyView: View {
                     advance(known: known)
                     return
                 }
+                let swipedCard = currentCard
                 withAnimation(.easeIn(duration: 0.2)) { dragOffset.width = known ? 600 : -600 }
                 Task {
                     try? await Task.sleep(for: .milliseconds(200))
                     dragOffset = .zero
+                    guard let swipedCard, currentCard === swipedCard else { return }
                     advance(known: known)
                 }
             }
@@ -353,7 +355,7 @@ struct FlashcardStudyView: View {
         step.card.isKnown = step.wasKnown
         step.card.lastReviewedAt = step.previousReviewDate
         if step.markedKnown { knownThisSession -= 1 }
-        index = step.index
+        index = queue.firstIndex { $0 === step.card } ?? min(step.index, max(queue.count - 1, 0))
         showingAnswer = false
         phase = .studying
     }
@@ -382,7 +384,11 @@ struct FlashcardStudyView: View {
         context.delete(card)
         showingAnswer = false
         if phase == .studying, index >= queue.count {
-            phase = queue.isEmpty && history.isEmpty ? (deck.cards.isEmpty ? .studying : .allMastered) : .finished
+            if queue.isEmpty && history.isEmpty {
+                startSession(with: Self.cardsToReview(in: deck))
+            } else {
+                phase = .finished
+            }
         }
     }
 
