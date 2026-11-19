@@ -82,11 +82,14 @@ enum StudyAI {
         return stored.isEmpty ? defaultGeminiModel : stored
     }
 
+    /// Set when Automatic mode's Apple Intelligence attempt fails, so later requests go straight to the next engine.
+    nonisolated(unsafe) static var appleIntelligenceFailed = false
+
     static var hasGeminiKey: Bool { !(Keychain.geminiAPIKey ?? "").isEmpty }
 
     static func resolvedEngine(_ engine: AIEngine = selectedEngine) -> AIEngine {
         guard engine == .automatic else { return engine }
-        if appleIntelligenceAvailable { return .appleIntelligence }
+        if appleIntelligenceAvailable && !appleIntelligenceFailed { return .appleIntelligence }
         if hasGeminiKey { return .gemini }
         return .offline
     }
@@ -136,6 +139,10 @@ enum StudyAI {
             guard !set.flashcards.isEmpty else { throw StudyAIError.emptyResult }
             return Outcome(set: set, engine: engine, note: nil)
         } catch {
+            if selectedEngine == .automatic {
+                if engine == .appleIntelligence { appleIntelligenceFailed = true }
+                return resolvedEngine() == .gemini ? await makeStudySet(notes: notes, title: title) : offline(nil)
+            }
             return offline("\(engine.displayName) didn't work (\(error.localizedDescription)), so these were made in offline mode.")
         }
     }
@@ -150,6 +157,10 @@ enum StudyAI {
                 if !reply.isEmpty { return reply }
             } catch {
                 let fallback = OfflineProvider.reply(notes: notes, title: title, history: history, question: question)
+                if selectedEngine == .automatic {
+                    if engine == .appleIntelligence { appleIntelligenceFailed = true }
+                    return fallback
+                }
                 return "\(fallback)\n\n(\(engine.displayName) didn't respond: \(error.localizedDescription).)"
             }
         }
