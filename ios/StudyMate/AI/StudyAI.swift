@@ -140,7 +140,8 @@ enum StudyAI {
             return Outcome(set: set, engine: engine, note: nil)
         } catch {
             if selectedEngine == .automatic {
-                if engine == .appleIntelligence { appleIntelligenceFailed = true }
+                guard engine == .appleIntelligence else { return offline(nil) }
+                appleIntelligenceFailed = true
                 return resolvedEngine() == .gemini ? await makeStudySet(notes: notes, title: title) : offline(nil)
             }
             return offline("\(engine.displayName) didn't work (\(error.localizedDescription)), so these were made in offline mode.")
