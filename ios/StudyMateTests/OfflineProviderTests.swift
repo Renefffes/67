@@ -282,4 +282,8 @@ final class OfflineProviderTests: XCTestCase {
         let reply = OfflineProvider.reply(notes: notes, history: history, question: "Why do you say so?")
         XCTAssertTrue(reply.contains("stores DNA"), reply)
     }
+
+    func testTutorTextLeavesCodeSpansAlone() {
+        XCTAssertEqual(String(TutorText.attributed("Run `2*3` now").characters), "Run 2*3 now")
+    }
 }

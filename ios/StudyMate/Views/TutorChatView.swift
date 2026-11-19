@@ -163,9 +163,7 @@ enum TutorText {
                 line = indent + "• " + trimmed.dropFirst(marker.count)
             }
             var piece = (try? AttributedString(
-                markdown: line
-                    .replacingOccurrences(of: "_____", with: "\\_\\_\\_\\_\\_")
-                    .replacingOccurrences(of: #"(?<=[A-Za-z0-9])\*(?=[A-Za-z0-9])"#, with: #"\\*"#, options: .regularExpression),
+                markdown: escapingLiteralMarks(line),
                 options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
             )) ?? AttributedString(line)
             if isHeading { piece.font = .headline }
@@ -173,5 +171,16 @@ enum TutorText {
             if index < lines.count - 1 { result += AttributedString("\n") }
         }
         return result
+    }
+
+    /// Escapes blanks and in-word `*` (as in 2*3) so they aren't read as emphasis, leaving `code spans` untouched.
+    private static func escapingLiteralMarks(_ line: String) -> String {
+        line.components(separatedBy: "`").enumerated().map { index, part in
+            index.isMultiple(of: 2)
+                ? part
+                    .replacingOccurrences(of: "_____", with: "\\_\\_\\_\\_\\_")
+                    .replacingOccurrences(of: #"(?<=[A-Za-z0-9])\*(?=[A-Za-z0-9])"#, with: #"\\*"#, options: .regularExpression)
+                : part
+        }.joined(separator: "`")
     }
 }
