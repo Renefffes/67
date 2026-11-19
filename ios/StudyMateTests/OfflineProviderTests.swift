@@ -506,4 +506,9 @@ final class OfflineProviderTests: XCTestCase {
     func testKatakanaLongVowelTermIsADefinition() {
         XCTAssertEqual(OfflineProvider.definition(in: "エネルギーは仕事をする能力")?.term, "エネルギー")
     }
+
+    func testBulletedReminderIsNotAQuizOption() {
+        let set = OfflineProvider.studySet(from: "Osmosis is the movement of water across a membrane.\nDiffusion is the spreading of particles.\n- TODO buy groceries", title: "")
+        XCTAssertFalse(set.quiz.flatMap(\.options).contains { $0.lowercased().contains("groceries") })
+    }
 }

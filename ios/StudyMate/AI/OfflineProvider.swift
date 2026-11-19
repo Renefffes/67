@@ -42,7 +42,7 @@ struct OfflineProvider: StudyAIProvider {
             cards = [GeneratedCard(front: "Summarize \(name)", back: summary.isEmpty ? "(empty notes)" : String(summary.prefix(300)))]
         }
 
-        let studyLines = notes.components(separatedBy: .newlines).map { stripMarkup($0.trimmed) }.filter { !isTask($0) }
+        let studyLines = notes.components(separatedBy: .newlines).map { stripBullet(stripMarkup($0.trimmed)) }.filter { !isTask($0) }
         let fallbackPool = keywords(in: studyLines.joined(separator: "\n"), limit: 30)
         var quiz: [GeneratedQuestion] = []
         for (index, card) in cards.enumerated() where quiz.count < maxQuestions {
