@@ -174,6 +174,100 @@ final class StudyMateUITests: XCTestCase {
         snapshot("0-library")
     }
 
+    func testFirstLaunchSampleNotesShortcut() {
+        XCTAssertTrue(app.buttons["emptyStateSettingsButton"].exists)
+        app.buttons["emptyStateSampleButton"].tap()
+        XCTAssertEqual(app.textFields["deckTitleField"].value as? String, "Biology – The Cell")
+        XCTAssertTrue(app.buttons["generateButton"].isEnabled)
+        app.buttons["generateButton"].tap()
+        XCTAssertTrue(app.buttons["flashcardsLink"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Biology – The Cell"].exists)
+    }
+
+    func testSettingsWarnsUntilGeminiKeyIsSaved() {
+        app.buttons["settingsButton"].tap()
+        app.buttons["enginePicker"].firstMatch.tap()
+        app.buttons["Google Gemini"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["engineWarning"].waitForExistence(timeout: 5))
+        XCTAssertTrue(activeEngineLabel.label.contains("Offline mode"), activeEngineLabel.label)
+
+        let field = app.textFields["geminiKeyField"]
+        field.tap()
+        field.typeText("sk-wrong")
+        XCTAssertTrue(app.staticTexts["geminiKeyFormatHint"].exists)
+        field.typeText(String(repeating: "\u{8}", count: 8) + "AIzaTestKey1234")
+        XCTAssertFalse(app.staticTexts["geminiKeyFormatHint"].exists)
+        app.buttons["saveGeminiKeyButton"].tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["geminiKeySaved"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["engineWarning"].exists)
+        XCTAssertTrue(activeEngineLabel.label.contains("Google Gemini"), activeEngineLabel.label)
+        snapshot("8-settings-gemini-key")
+
+        app.buttons["settingsDoneButton"].tap()
+        app.buttons["settingsButton"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["geminiKeySaved"].waitForExistence(timeout: 5))
+        app.buttons["removeGeminiKeyButton"].tap()
+        XCTAssertTrue(app.textFields["geminiKeyField"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["engineWarning"].exists)
+    }
+
+    func testAppleIntelligenceChoiceExplainsFallback() {
+        app.buttons["settingsButton"].tap()
+        app.buttons["enginePicker"].firstMatch.tap()
+        app.buttons["Apple Intelligence"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["engineWarning"].waitForExistence(timeout: 5))
+        XCTAssertTrue(activeEngineLabel.label.contains("Offline mode"), activeEngineLabel.label)
+    }
+
+    func testSearchAndDeleteDecks() {
+        createSampleDeck()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["newDeckButton"].tap()
+        let title = app.textFields["deckTitleField"]
+        title.tap()
+        title.typeText("Chemistry")
+        let notes = app.textViews["notesEditor"]
+        notes.tap()
+        notes.typeText("Osmosis is the movement of water across a membrane.")
+        app.buttons["generateButton"].tap()
+        XCTAssertTrue(app.buttons["flashcardsLink"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        let search = app.searchFields.firstMatch
+        if !search.waitForExistence(timeout: 2) { app.swipeDown() }
+        search.tap()
+        search.typeText("Chem")
+        XCTAssertTrue(app.staticTexts["Chemistry"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Biology – The Cell"].exists)
+        search.typeText(String(repeating: "\u{8}", count: 4))
+
+        let biology = app.staticTexts["Biology – The Cell"]
+        XCTAssertTrue(biology.waitForExistence(timeout: 5))
+        biology.swipeLeft()
+        app.buttons["Delete"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["confirmDeleteDeckButton"].firstMatch.waitForExistence(timeout: 5))
+        app.buttons["confirmDeleteDeckButton"].firstMatch.tap()
+        XCTAssertFalse(biology.waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["Chemistry"].exists)
+    }
+
+    func testEmptyStateReachableWithLargestText() {
+        app.terminate()
+        app.launchArguments = ["-uiTesting", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        let create = app.buttons["emptyStateNewDeckButton"]
+        XCTAssertTrue(create.waitForExistence(timeout: 5))
+        if !create.isHittable { app.swipeUp() }
+        XCTAssertTrue(create.isHittable)
+        create.tap()
+        XCTAssertTrue(app.textFields["deckTitleField"].waitForExistence(timeout: 5))
+    }
+
+    private var activeEngineLabel: XCUIElement {
+        app.staticTexts["activeEngineLabel"].exists ? app.staticTexts["activeEngineLabel"] : app.otherElements["activeEngineLabel"]
+    }
+
     private func createSampleDeck() {
         app.buttons["newDeckButton"].tap()
         app.buttons["sampleNotesButton"].tap()
