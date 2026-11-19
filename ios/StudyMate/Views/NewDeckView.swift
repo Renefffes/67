@@ -4,6 +4,7 @@ import SwiftUI
 import VisionKit
 
 struct NewDeckView: View {
+    var startWithSample = false
     var onCreated: (Deck) -> Void
 
     @Environment(\.modelContext) private var context
@@ -107,6 +108,11 @@ struct NewDeckView: View {
                 .ignoresSafeArea()
             }
             .interactiveDismissDisabled(isGenerating)
+            .onAppear {
+                guard startWithSample, notes.isEmpty else { return }
+                title = SampleNotes.title
+                notes = SampleNotes.text
+            }
         }
     }
 

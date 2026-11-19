@@ -3,7 +3,7 @@ import Security
 
 enum Keychain {
     private static let service = "com.renefffes.studymate"
-    private static let geminiAccount = "gemini-api-key"
+    private static let geminiAccount = AppEnvironment.isUITesting ? "gemini-api-key-uitests" : "gemini-api-key"
 
     static var geminiAPIKey: String? {
         get { read(account: geminiAccount) }
