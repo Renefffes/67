@@ -170,6 +170,8 @@ private struct DeckRow: View {
                 Label("\(deck.cards.count) cards", systemImage: "rectangle.on.rectangle")
                 Label("\(deck.questions.count) questions", systemImage: "checklist")
             }
+            .labelStyle(dynamicTypeSize.isAccessibilitySize ? AnyLabelStyle(.titleOnly) : AnyLabelStyle(.titleAndIcon))
+            .fixedSize(horizontal: false, vertical: true)
             .font(.caption)
             .foregroundStyle(.secondary)
             if !deck.cards.isEmpty {
@@ -181,4 +183,10 @@ private struct DeckRow: View {
         }
         .padding(.vertical, 4)
     }
+}
+
+private struct AnyLabelStyle: LabelStyle {
+    private let make: (Configuration) -> AnyView
+    init<S: LabelStyle>(_ style: S) { make = { AnyView(style.makeBody(configuration: $0)) } }
+    func makeBody(configuration: Configuration) -> some View { make(configuration) }
 }
