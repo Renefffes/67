@@ -379,6 +379,7 @@ struct FlashcardStudyView: View {
             queue.remove(at: position)
             if position < index { index -= 1 }
         }
+        knownThisSession -= history.filter { $0.card === card && $0.markedKnown }.count
         history.removeAll { $0.card === card }
         deck.cards.removeAll { $0 === card }
         context.delete(card)
