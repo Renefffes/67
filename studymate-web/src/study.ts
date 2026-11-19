@@ -37,6 +37,15 @@ export function sourceFact(card: Card): string {
   const term = card.front.match(/^What (?:is|are) (.+)\?$/)?.[1];
   return term ? `${term}: ${card.back}` : card.back;
 }
+export function isGroundedQuestion(question: string, fact: string): boolean {
+  if (!question.endsWith('?') || question.length > 500) return false;
+  const tokens = (text: string) => text.toLowerCase().normalize('NFKC').match(/[\p{L}\p{N}]{3,}/gu) ?? [];
+  const framing = new Set('what which who whose where when why how does did can could would should are was were has had have the this that these those and for from with into about only based given following according fact notes context question answer name term meaning means define definition called you your our its say tell explain please best way get see'.split(' '));
+  const content = tokens(question).filter(word => !framing.has(word));
+  const source = new Set(tokens(fact));
+  // Prefer the notes-based card over introducing any unsupported content words.
+  return content.length > 0 && content.every(word => source.has(word));
+}
 export function relevantNotes(question: string, deck: Deck): string {
   const words = question.toLowerCase().match(/[\p{L}\p{N}]{3,}/gu)?.filter(w => !['what','does','that','this','with','have','explain','about','could','please','which','tell','from','the','and','are','how','why'].includes(w)) ?? [];
   const ranked = deck.cards.map(c => ({c, score: words.reduce((n, w) => n + (`${c.front} ${c.back}`.toLowerCase().includes(w) ? 1 : 0), 0)})).filter(r => r.score > 0).sort((a,b) => b.score-a.score).slice(0, 3);

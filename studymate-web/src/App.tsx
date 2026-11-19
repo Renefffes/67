@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowDownToLine, ArrowLeft, ArrowRight, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, CloudOff, Download, Flame, GraduationCap, Grid2X2, Layers, Leaf, MessageCircle, MoreHorizontal, Plus, RotateCcw, Search, Settings2, Sparkles, Timer, Trash2, Trophy, Upload, Volume2, X, Zap } from 'lucide-react';
-import { canPlayChoices, choicesFor, extractCards, initialData, palette, relevantNotes, sampleNotes, shuffle, sourceFact, trueFalseAnswer, uid, validateData, type Card, type Deck, type StudyData } from './study';
+import { canPlayChoices, choicesFor, extractCards, initialData, isGroundedQuestion, palette, relevantNotes, sampleNotes, shuffle, sourceFact, trueFalseAnswer, uid, validateData, type Card, type Deck, type StudyData } from './study';
 import { aiReady, connectAI, generate, loadAI, stopAI } from './ai';
 import { isPreview, prepareOffline } from './offline';
 type Page = 'library' | 'games' | 'tutor' | 'settings';
@@ -99,7 +99,7 @@ function NewDeck({onClose,onCreate,ready}:{onClose:()=>void;onCreate:(d:Deck,mes
           const card=cards[i];
           const fact=sourceFact(card);
           const question=(await generate(`Generate one question about this fact.\nFact: ${fact.slice(0,1800)}\nQuestion:`,80)).trim().replace(/^Question:\s*/i,'');
-          if(question.endsWith('?')&&question.length<=500){cards[i]={...card,front:question,back:fact};drafted++;}
+          if(isGroundedQuestion(question,fact)){cards[i]={...card,front:question,back:fact};drafted++;}
         }
         message=drafted?`Local AI drafted ${drafted} questions. Review your cards before studying.`:'Local AI did not return usable questions. Cards were made directly from your notes.';
       }catch{setError('AI was interrupted. Turn off AI to build cards directly from your notes.');setBusy(false);return;}
