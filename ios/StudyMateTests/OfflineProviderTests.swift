@@ -35,6 +35,28 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(wrong.hasPrefix("Not quite."), wrong)
     }
 
+    func testTutorGradesAnswerThatMentionsQuiz() {
+        let notes = "A quiz is a short test of knowledge."
+        let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me")
+        let history = [TutorTurn(isUser: true, text: "Quiz me"), TutorTurn(isUser: false, text: question)]
+        let answer = OfflineProvider.reply(notes: notes, history: history, question: "a short test of knowledge, like a quiz")
+        XCTAssertTrue(answer.hasPrefix("Nice, that's right!"), answer)
+        let next = OfflineProvider.reply(notes: notes, history: history, question: "quiz me again")
+        XCTAssertTrue(next.hasPrefix(OfflineProvider.quizPrefix), next)
+    }
+
+    func testTutorGradesTheCardItAsked() {
+        let notes = "Mitochondria produce energy. Ribosomes produce proteins. Chloroplasts capture sunlight."
+        let set = OfflineProvider.studySet(from: notes, title: "")
+        var history: [TutorTurn] = []
+        for _ in 0..<2 {
+            history.append(TutorTurn(isUser: true, text: "Quiz me"))
+            history.append(TutorTurn(isUser: false, text: OfflineProvider.reply(notes: notes, history: history, question: "Quiz me")))
+        }
+        let answer = OfflineProvider.reply(notes: notes, history: history, question: set.flashcards[1 % set.flashcards.count].back)
+        XCTAssertTrue(answer.hasPrefix("Nice, that's right!"), answer)
+    }
+
     func testColonNotesBecomeTermCards() {
         let set = OfflineProvider.studySet(from: "- Mitosis: cell division producing two identical cells", title: "")
         XCTAssertEqual(set.flashcards.first?.front, "Mitosis")

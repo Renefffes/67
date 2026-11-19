@@ -158,14 +158,18 @@ struct OfflineProvider: StudyAIProvider {
         let all = sentences(in: notes)
         let set = studySet(from: notes, title: "")
 
-        if lower.contains("quiz") || lower.contains("test me") {
-            let asked = history.filter { !$0.isUser && $0.text.hasPrefix(quizPrefix) }.count
+        let asked = history.filter { !$0.isUser && $0.text.hasPrefix(quizPrefix) }.count
+        let awaitingAnswer = history.last.map { !$0.isUser && $0.text.hasPrefix(quizPrefix) } ?? false
+        let trimmed = lower.trimmed
+        let isQuizCommand = ["quiz me", "test me", "another", "next"].contains { trimmed.hasPrefix($0) }
+
+        if isQuizCommand || (!awaitingAnswer && (lower.contains("quiz") || lower.contains("test me"))) {
             let card = set.flashcards[asked % set.flashcards.count]
             return "\(quizPrefix) \(card.front)\n\nType your answer and I'll check it."
         }
 
-        if let last = history.last, !last.isUser, last.text.hasPrefix(quizPrefix),
-           let card = set.flashcards.first(where: { last.text.hasPrefix("\(quizPrefix) \($0.front)\n") }) {
+        if awaitingAnswer {
+            let card = set.flashcards[(asked - 1) % set.flashcards.count]
             let expected = Set(words(in: card.back.lowercased()).filter { !stopWords.contains($0) })
             let given = Set(words(in: lower))
             let correct = expected.isEmpty
