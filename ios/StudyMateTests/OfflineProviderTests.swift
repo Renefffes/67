@@ -269,4 +269,9 @@ final class OfflineProviderTests: XCTestCase {
             XCTAssertTrue(reply.hasPrefix("The answer is:"), reply)
         }
     }
+
+    func testSummaryOfVocabularyNotesListsTheWords() {
+        let reply = OfflineProvider.reply(notes: "Mitochondria\nRibosome", history: [], question: "Summarize")
+        XCTAssertTrue(reply.contains("Mitochondria") && reply.contains("Ribosome"), reply)
+    }
 }

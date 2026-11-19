@@ -209,8 +209,11 @@ struct OfflineProvider: StudyAIProvider {
             return "Here's what your notes say:\n" + bullets((followUp && !unseen.isEmpty ? unseen : ranked).prefix(3))
         }
         if lower.contains("summar") || lower.contains("explain") || lower.contains("main") || lower.contains("focus") || lower.contains("overview") {
-            return "The main ideas in \(name):\n" + bullets(all.prefix(4))
-                + (all.count > 4 ? "\n\nSay “tell me more” for the rest." : "")
+            let points = all.isEmpty
+                ? notes.components(separatedBy: .newlines).map { stripBullet($0.trimmed) }.filter { !$0.isEmpty }
+                : all
+            return "The main ideas in \(name):\n" + bullets(points.prefix(4))
+                + (points.count > 4 ? "\n\nSay “tell me more” for the rest." : "")
         }
         return "I couldn't find that in \(name). Try asking about \(topicList(notes))."
             + tipIfNeeded(alreadySaid)
