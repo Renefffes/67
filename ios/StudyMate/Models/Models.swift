@@ -36,6 +36,10 @@ final class Deck {
     var knownCount: Int { cards.filter(\.isKnown).count }
 
     func apply(_ set: GeneratedStudySet, engine: AIEngine, note: String?) {
+        if let context = modelContext {
+            cards.forEach(context.delete)
+            questions.forEach(context.delete)
+        }
         cards.removeAll()
         questions.removeAll()
         self.engine = engine.displayName

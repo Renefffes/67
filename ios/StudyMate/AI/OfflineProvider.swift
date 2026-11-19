@@ -19,6 +19,7 @@ struct OfflineProvider: StudyAIProvider {
     static func studySet(from notes: String, title: String) -> GeneratedStudySet {
         var cards: [GeneratedCard] = []
         var definitionCards: Set<Int> = []
+        var clozeCards: Set<Int> = []
         var sources: [String] = []
         for sentence in sentences(in: notes) where cards.count < maxCards {
             if let (term, definition, verb) = definition(in: sentence) {
@@ -29,6 +30,7 @@ struct OfflineProvider: StudyAIProvider {
                 sources.append(sentence)
             } else if let keyword = keyword(in: sentence) {
                 let blanked = sentence.replacingOccurrences(of: keyword, with: "_____", options: [], range: sentence.range(of: keyword))
+                clozeCards.insert(cards.count)
                 cards.append(GeneratedCard(front: blanked, back: keyword))
                 sources.append(sentence)
             }
@@ -42,9 +44,10 @@ struct OfflineProvider: StudyAIProvider {
         let fallbackPool = keywords(in: notes, limit: 20)
         var quiz: [GeneratedQuestion] = []
         for (index, card) in cards.prefix(maxQuestions).enumerated() {
-            let isCloze = !definitionCards.contains(index)
+            let isCloze = clozeCards.contains(index)
+            guard isCloze || definitionCards.contains(index) else { continue }
             let others = cards.enumerated()
-                .filter { $0.offset != index && definitionCards.contains($0.offset) != isCloze }
+                .filter { $0.offset != index && clozeCards.contains($0.offset) == isCloze && (isCloze || definitionCards.contains($0.offset)) }
                 .map(\.element.back)
             var distractors: [String] = []
             for candidate in others + fallbackPool where distractors.count < 3 {
@@ -139,7 +142,7 @@ struct OfflineProvider: StudyAIProvider {
     }
 
     private static func stripBullet(_ line: String) -> String {
-        line.replacingOccurrences(of: #"^([-•*·]|\d+[.)])\s*"#, with: "", options: .regularExpression)
+        line.replacingOccurrences(of: #"^([•*·]\s*|[-–]\s+|\d+[.)]\s+)"#, with: "", options: .regularExpression)
     }
 
     static func stableHash(_ text: String) -> Int {
@@ -160,7 +163,7 @@ struct OfflineProvider: StudyAIProvider {
         let name = title.trimmed.isEmpty ? "your notes" : "“\(title.trimmed)”"
         let alreadySaid = history.filter { !$0.isUser }.map(\.text).joined(separator: "\n")
 
-        if let pending = pendingQuizCard(history: history, cards: cards), !isQuestion(lower) || isSkip(lower) {
+        if let pending = pendingQuizCard(history: history, cards: cards), !isQuestion(lower) && !isQuizCommand(lower) || isSkip(lower) {
             if isStop(lower) { return "Quiz paused. Ask me anything about \(name), or say “quiz me” to keep going." }
             if isSkip(lower) || isNext(lower) {
                 return "The answer is: \(pending.back)\n\n" + quizQuestion(history: history, cards: cards)
@@ -259,7 +262,11 @@ struct OfflineProvider: StudyAIProvider {
     private static func isQuestion(_ text: String) -> Bool {
         let first = text.split(separator: " ").first.map(String.init) ?? ""
         return ["what", "what's", "why", "how", "when", "where", "who", "which", "can", "could", "explain", "tell", "summarize", "summarise"].contains(first)
-            && text.hasSuffix("?") || text.contains("quiz")
+            && text.hasSuffix("?")
+    }
+
+    private static func isQuizCommand(_ text: String) -> Bool {
+        ["quiz me", "test me"].contains { text.hasPrefix($0) }
     }
 
     private static func isSkip(_ text: String) -> Bool {

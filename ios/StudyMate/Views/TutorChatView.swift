@@ -7,6 +7,7 @@ struct TutorChatView: View {
     @State private var draft = ""
     @State private var isThinking = false
     @State private var confirmingClear = false
+    @State private var conversationID = UUID()
     @FocusState private var inputFocused: Bool
 
     private let suggestions = ["Explain the main ideas simply", "Quiz me on this", "What should I focus on?"]
@@ -62,6 +63,7 @@ struct TutorChatView: View {
         .alert("Clear this conversation?", isPresented: $confirmingClear) {
             Button("Cancel", role: .cancel) {}
             Button("Clear", role: .destructive) {
+                conversationID = UUID()
                 deck.messages.forEach(context.delete)
                 deck.messages.removeAll()
             }
@@ -114,10 +116,12 @@ struct TutorChatView: View {
         deck.messages.append(ChatMessage(isUser: true, text: question, order: nextOrder))
         draft = ""
         isThinking = true
+        let conversation = conversationID
         Task {
             let reply = await StudyAI.tutorReply(notes: deck.notes, title: deck.title, history: history, question: question)
-            deck.messages.append(ChatMessage(isUser: false, text: reply, order: nextOrder))
             isThinking = false
+            guard conversation == conversationID else { return }
+            deck.messages.append(ChatMessage(isUser: false, text: reply, order: nextOrder))
         }
     }
 
