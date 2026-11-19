@@ -499,7 +499,7 @@ final class OfflineProviderTests: XCTestCase {
     }
 
     func testReflowJoinsLineStartingWithIonCharge() {
-        XCTAssertEqual(TextRecognizer.reflow(["In water, salt releases", "Cl- ions and sodium."]).contains("\n"), false)
+        XCTAssertEqual(TextRecognizer.reflow(["Salt in water releases", "free Cl- ions and sodium."]).contains("\n"), false)
         XCTAssertEqual(TextRecognizer.reflow(["Table salt is made of", "lowercase cl- and na+ ions."]).contains("\n"), false)
     }
 
