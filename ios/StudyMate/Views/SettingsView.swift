@@ -136,6 +136,11 @@ struct SettingsView: View {
                 Button("Save key", action: saveDraftKey)
                     .disabled(keyDraft.trimmed.isEmpty)
                     .accessibilityIdentifier("saveGeminiKeyButton")
+                if case .failed(let message) = keyCheck {
+                    Label(message, systemImage: "xmark.octagon.fill")
+                        .foregroundStyle(.red)
+                        .accessibilityIdentifier("geminiKeySaveError")
+                }
             }
             LabeledContent("Model") {
                 TextField(StudyAI.defaultGeminiModel, text: $geminiModel)
@@ -156,7 +161,11 @@ struct SettingsView: View {
         let key = keyDraft.filter { !$0.isWhitespace }
         guard !key.isEmpty else { return }
         Keychain.geminiAPIKey = key
-        savedKey = Keychain.geminiAPIKey ?? key
+        guard let stored = Keychain.geminiAPIKey, stored == key else {
+            keyCheck = .failed("Couldn't save the key to this device's Keychain. Try again.")
+            return
+        }
+        savedKey = stored
         keyDraft = ""
         keyCheck = .idle
     }
@@ -218,8 +227,13 @@ enum GeminiKeyChecker {
             throw Failure(errorDescription: "Couldn't reach Google. Check your internet connection.")
         }
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        guard !(200..<300).contains(status) else { return }
         let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        if (200..<300).contains(status) {
+            if let methods = json?["supportedGenerationMethods"] as? [String], !methods.contains("generateContent") {
+                throw Failure(errorDescription: "Model “\(model)” can't write flashcards. Try \(StudyAI.defaultGeminiModel).")
+            }
+            return
+        }
         let message = ((json?["error"] as? [String: Any])?["message"] as? String) ?? ""
         switch status {
         case 400 where message.localizedCaseInsensitiveContains("api key"), 401, 403:
