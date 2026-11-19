@@ -484,4 +484,9 @@ final class OfflineProviderTests: XCTestCase {
     func testFormulaAnswerKeepsCase() {
         XCTAssertEqual(OfflineProvider.studySet(from: "Velocity = dx / dt", title: "").flashcards.first?.back, "dx / dt")
     }
+
+    func testShortDatedFactMakesAClozeCard() {
+        let set = OfflineProvider.studySet(from: "Napoleon died in 1821", title: "")
+        XCTAssertTrue(set.flashcards.first?.front.contains("_____") == true, "\(set.flashcards)")
+    }
 }

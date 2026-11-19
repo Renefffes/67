@@ -140,7 +140,9 @@ struct OfflineProvider: StudyAIProvider {
 
     static func keyword(in sentence: String) -> String? {
         let words = words(in: sentence).filter { $0.count >= 4 && !stopWords.contains($0.lowercased()) }
-        guard sentence.split(separator: " ").filter({ $0.contains(where: \.isLetter) }).count >= 4 else { return nil }
+        let tokens = sentence.split(separator: " ")
+        guard tokens.filter({ $0.contains(where: \.isLetter) }).count >= 3,
+              tokens.filter({ $0.contains(where: { $0.isLetter || $0.isNumber }) }).count >= 4 else { return nil }
         return words.max { score($0) < score($1) }
     }
 
