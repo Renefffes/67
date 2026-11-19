@@ -229,4 +229,9 @@ final class OfflineProviderTests: XCTestCase {
         let reply = OfflineProvider.reply(notes: notes, history: history, question: "a rope used to skip")
         XCTAssertTrue(reply.hasPrefix("Correct!"), reply)
     }
+
+    func testCardIsNotAcceptedForCar() {
+        XCTAssertTrue(OfflineProvider.grade(answer: "card", card: GeneratedCard(front: "What has four wheels?", back: "Car")).hasPrefix("Not quite"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "divided", card: GeneratedCard(front: "What happens?", back: "Divide")).hasPrefix("Correct!"))
+    }
 }

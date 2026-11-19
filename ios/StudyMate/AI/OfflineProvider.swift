@@ -270,7 +270,9 @@ struct OfflineProvider: StudyAIProvider {
     private static func isWordForm(_ a: String, of b: String) -> Bool {
         let (short, long) = a.count <= b.count ? (a, b) : (b, a)
         guard short.count >= 3 || short == long, long.hasPrefix(short) else { return false }
-        return ["", "s", "es", "d", "ed", "ing", "ly"].contains(String(long.dropFirst(short.count)))
+        let suffix = String(long.dropFirst(short.count))
+        if suffix == "d" { return short.hasSuffix("e") }
+        return ["", "s", "es", "ed", "ing", "ly"].contains(suffix)
     }
 
     // MARK: Tutor intents
