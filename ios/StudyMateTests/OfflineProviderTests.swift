@@ -360,4 +360,8 @@ final class OfflineProviderTests: XCTestCase {
         let history = [TutorTurn(isUser: true, text: "Summarize"), TutorTurn(isUser: false, text: first)]
         XCTAssertTrue(OfflineProvider.reply(notes: notes, history: history, question: "Tell me more").contains("Echo"))
     }
+
+    func testEscapedBacktickDoesNotStartCode() {
+        XCTAssertEqual(String(TutorText.attributed("\\` then 2*3*4").characters), "` then 2*3*4")
+    }
 }
