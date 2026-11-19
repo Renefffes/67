@@ -476,4 +476,8 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertNil(OfflineProvider.definition(in: "鲸鱼不是鱼类"))
         XCTAssertEqual(OfflineProvider.definition(in: "水は液体です")?.term, "水")
     }
+
+    func testCodeSpanKeepsDunderName() {
+        XCTAssertEqual(OfflineProvider.sentences(in: "`__init__` sets up a new object"), ["__init__ sets up a new object"])
+    }
 }

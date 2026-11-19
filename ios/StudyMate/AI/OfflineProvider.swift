@@ -180,10 +180,12 @@ struct OfflineProvider: StudyAIProvider {
         return first.isNumber ? 1 : first.isUppercase ? 2 : 3
     }
 
+    /// Drops headings, bold and backticks, but keeps the text of `code spans` as written (`__init__`).
     private static func stripMarkup(_ line: String) -> String {
-        line.replacingOccurrences(of: #"^#{1,6}\s+"#, with: "", options: .regularExpression)
-            .replacingOccurrences(of: #"\*\*|__|`"#, with: "", options: .regularExpression)
-            .trimmed
+        let line = line.replacingOccurrences(of: #"^#{1,6}\s+"#, with: "", options: .regularExpression)
+        return line.components(separatedBy: "`").enumerated().map { index, part in
+            index.isMultiple(of: 2) ? part.replacingOccurrences(of: #"\*\*|__"#, with: "", options: .regularExpression) : part
+        }.joined().trimmed
     }
 
     /// Reminders to self ("TODO ask prof…") aren't study material.
