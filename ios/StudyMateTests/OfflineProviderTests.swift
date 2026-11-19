@@ -114,6 +114,23 @@ final class OfflineProviderTests: XCTestCase {
         }
     }
 
+    func testSkippedCardDoesNotShortenTheQuiz() {
+        let notes = """
+        Osmosis is the movement of water across a membrane.
+        The heart pumps blood through arteries.
+        Plants absorb sunlight through leaves.
+        Neurons carry signals along axons.
+        Enzymes speed up chemical reactions.
+        Bacteria reproduce by binary fission.
+        Glaciers carve valleys over centuries.
+        Volcanoes release magma from the mantle.
+        Earthquakes shake the tectonic plates.
+        """
+        let set = OfflineProvider.studySet(from: notes, title: "")
+        XCTAssertGreaterThan(set.flashcards.count, OfflineProvider.maxQuestions)
+        XCTAssertEqual(set.quiz.count, OfflineProvider.maxQuestions)
+    }
+
     func testTermNotesAskWhatTheTermMeans() {
         let notes = "- Mitosis: cell division producing two identical cells\n- Meiosis: cell division producing four gametes"
         let set = OfflineProvider.studySet(from: notes, title: "")

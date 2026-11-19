@@ -43,7 +43,7 @@ struct OfflineProvider: StudyAIProvider {
 
         let fallbackPool = keywords(in: notes, limit: 30)
         var quiz: [GeneratedQuestion] = []
-        for (index, card) in cards.prefix(maxQuestions).enumerated() {
+        for (index, card) in cards.enumerated() where quiz.count < maxQuestions {
             let isCloze = clozeCards.contains(index)
             guard isCloze || definitionCards.contains(index) else { continue }
             let seed = stableHash(card.front)
