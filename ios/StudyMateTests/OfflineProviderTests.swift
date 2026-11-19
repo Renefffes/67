@@ -457,4 +457,9 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(set.flashcards.contains { $0.front.contains("organismo") || $0.back.contains("organismo") })
         XCTAssertFalse(set.flashcards.contains { $0.front.contains("repasar") || $0.back.contains("repasar") })
     }
+
+    func testReflowKeepsIonCharge() {
+        XCTAssertEqual(TextRecognizer.reflow(["Table salt releases Cl-", "ions in water."]), "Table salt releases Cl- ions in water.")
+        XCTAssertEqual(TextRecognizer.reflow(["Photo-", "synthesis makes sugar."]), "Photosynthesis makes sugar.")
+    }
 }
