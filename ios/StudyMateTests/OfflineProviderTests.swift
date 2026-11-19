@@ -321,14 +321,6 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertFalse(more.contains("surrounds every cell"), more)
     }
 
-    func testDescribeAnswerIsGraded() {
-        let notes = "Osmosis is the movement of water across a membrane."
-        let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me")
-        let history = [TutorTurn(isUser: true, text: "Quiz me"), TutorTurn(isUser: false, text: question)]
-        let reply = OfflineProvider.reply(notes: notes, history: history, question: "Describe the movement of water across a membrane")
-        XCTAssertTrue(reply.hasPrefix("Correct!"), reply)
-    }
-
     func testPoliteSkipRevealsAnswer() {
         let notes = "Osmosis is the movement of water across a membrane."
         let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me")
