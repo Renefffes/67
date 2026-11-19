@@ -42,7 +42,7 @@ struct OfflineProvider: StudyAIProvider {
             cards = [GeneratedCard(front: "Summarize \(name)", back: summary.isEmpty ? "(empty notes)" : String(summary.prefix(300)))]
         }
 
-        let fallbackPool = keywords(in: notes, limit: 30)
+        let fallbackPool = keywords(in: sentences(in: notes).joined(separator: ". "), limit: 30)
         var quiz: [GeneratedQuestion] = []
         for (index, card) in cards.enumerated() where quiz.count < maxQuestions {
             let isCloze = clozeCards.contains(index)
