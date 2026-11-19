@@ -1,0 +1,9 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { choicesFor, extractCards, initialData, relevantNotes, sampleNotes, validateData } from '../src/study.ts';
+test('turns real biology notes into distinct cards without losing the answers',()=>{const cards=extractCards(sampleNotes);assert.equal(cards.length,8);assert.match(cards[1].front,/Nucleus/);assert.match(cards[1].back,/DNA/);assert.ok(cards.every(c=>!c.known));});
+test('supports natural notes and non-ASCII vocabulary',()=>{const c=extractCards('The nucleus is the control centre.\nÀ bientôt: See you soon.');assert.equal(c.length,2);assert.equal(c[0].back,'the control centre.');assert.match(c[1].front,/À bientôt/);});
+test('choice learning has one correct answer and no duplicate options',()=>{const cards=extractCards(sampleNotes);for(let i=0;i<20;i++){const options=choicesFor(cards[0],cards);assert.equal(options.length,4);assert.equal(options.filter(a=>a===cards[0].back).length,1);assert.equal(new Set(options).size,4);}});
+test('never fabricates distractors when all answers are the same',()=>{const cards=extractCards('First thing: Identical answer.\nSecond thing: Identical answer.');assert.deepEqual(choicesFor(cards[0],cards),['Identical answer.']);});
+test('tutor retrieves relevant notes and declines unrelated questions',()=>{const deck=initialData().decks[0];assert.match(relevantNotes('What is the nucleus?',deck),/DNA/);assert.equal(relevantNotes('Who won Wimbledon?',deck),'');});
+test('backup validates complete shape and rejects malformed content',()=>{const data=initialData();assert.ok(validateData(JSON.parse(JSON.stringify(data))));assert.ok(!validateData({...data,answers:-1}));assert.ok(!validateData({...data,decks:[{...data.decks[0],cards:[{front:'missing answer'}]}]}));assert.ok(!validateData({...data,version:2}));});
