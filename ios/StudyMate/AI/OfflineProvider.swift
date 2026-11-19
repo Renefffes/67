@@ -253,7 +253,8 @@ struct OfflineProvider: StudyAIProvider {
         let expected = answerWords(card.back)
         let given = answerWords(answer)
         let matched = expected.filter { word in given.contains { isWordForm($0, of: word) } }.count
-        let numbersMatch = numbers(in: card.back).isSubset(of: numbers(in: answer))
+        let decimalCommas = answer.replacingOccurrences(of: #"(?<=[0-9]),(?=[0-9])"#, with: ".", options: .regularExpression)
+        let numbersMatch = numbers(in: card.back).isSubset(of: numbers(in: answer).union(numbers(in: decimalCommas)))
         let correct = expected.isEmpty
             ? answer.lowercased().contains(card.back.lowercased())
             : numbersMatch && matched * 2 >= expected.count
@@ -267,18 +268,26 @@ struct OfflineProvider: StudyAIProvider {
         Set(words(in: text.lowercased()).filter { !stopWords.contains($0) })
     }
 
-    /// Whole numbers as written, so "9.82" is not "9.81" and "40" is not "-40".
+    /// Whole numbers as written, so "9.82" is not "9.81" and "40" is not "-40"; the dash in "1939-1945" is a range, not a sign.
     private static func numbers(in text: String) -> Set<String> {
-        Set(text.matches(of: /-?[0-9]+(?:[.,][0-9]+)?/).map { $0.output.replacingOccurrences(of: ",", with: ".") })
+        Set(text.matches(of: /-?[0-9]+(?:\.[0-9]+)?/).map { match in
+            let afterDigit = match.range.lowerBound > text.startIndex && text[text.index(before: match.range.lowerBound)].isNumber
+            return String(afterDigit && match.output.hasPrefix("-") ? match.output.dropFirst() : match.output[...])
+        })
     }
 
-    /// "divide" matches "divides" or "divided", but "titan" does not match "titanium".
+    /// "divides" matches "divided" or "divide", and "masses" matches "mass", but "titan" does not match "titanium".
     private static func isWordForm(_ a: String, of b: String) -> Bool {
-        let (short, long) = a.count <= b.count ? (a, b) : (b, a)
-        guard short.count >= 3 || short == long, long.hasPrefix(short) else { return false }
-        let suffix = String(long.dropFirst(short.count))
-        if suffix == "d" { return short.hasSuffix("e") }
-        return ["", "s", "es", "ed", "ing", "ly"].contains(suffix)
+        !stems(a).isDisjoint(with: stems(b))
+    }
+
+    private static func stems(_ word: String) -> Set<String> {
+        var stems: Set<String> = [word]
+        for suffix in ["s", "es", "d", "ed", "ing", "ly"] where word.hasSuffix(suffix) {
+            let stem = String(word.dropLast(suffix.count))
+            if stem.count >= 3, suffix != "d" || stem.hasSuffix("e") { stems.insert(stem) }
+        }
+        return stems
     }
 
     // MARK: Tutor intents
