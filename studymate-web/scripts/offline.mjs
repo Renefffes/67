@@ -20,7 +20,9 @@ self.addEventListener('fetch',event=>{
  const url=new URL(event.request.url);
  if(event.request.method!=='GET'||url.origin!==self.location.origin)return;
  event.respondWith(caches.open(CACHE).then(async cache=>{
-  const saved=await cache.match(event.request,{ignoreSearch:true});
+  // Precache fetches omit Origin; module/style requests may include it.
+  // These are our own immutable static assets, not user-specific responses.
+  const saved=await cache.match(event.request,{ignoreSearch:true,ignoreVary:true});
   if(saved)return saved;
   try{return await fetch(event.request);}catch(error){if(event.request.mode==='navigate')return (await cache.match('./index.html'));throw error;}
  }));

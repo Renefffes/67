@@ -7,6 +7,35 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { runInNewContext } from 'node:vm';
 
+test('cached modules load offline despite the host varying responses by Origin', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'studymate-origin-'));
+  try {
+    await mkdir(join(dir, 'dist/assets'), { recursive: true });
+    await mkdir(join(dir, 'node_modules/onnxruntime-web/dist'), { recursive: true });
+    await writeFile(join(dir, 'dist/index.html'), '<title>StudyMate</title>');
+    execFileSync(process.execPath, [fileURLToPath(new URL('../scripts/offline.mjs', import.meta.url))], { cwd: dir });
+    const code = await readFile(join(dir, 'dist/sw.js'), 'utf8');
+    const request = new Request('https://example.org/assets/app.js', { headers: { Origin: 'https://example.org' }, mode: 'cors' });
+    let handler: (event: { request: Request; respondWith: (promise: Promise<Response>) => void }) => void = () => {};
+    runInNewContext(code, {
+      URL,
+      self: { registration: { scope: 'https://example.org/' }, location: { origin: 'https://example.org' }, addEventListener: (name: string, fn: typeof handler) => { if (name === 'fetch') handler = fn; } },
+      caches: { open: async () => ({ match: async (req: Request, options: { ignoreVary?: boolean }) => {
+        // Cache.addAll stored a request without Origin. Honor the real Vary contract.
+        if (req.headers.has('Origin') && !options.ignoreVary) return undefined;
+        return new Response('cached module', { headers: { Vary: 'Origin' } });
+      } }) },
+      fetch: async () => { throw new Error('Network is offline'); },
+    });
+    let response: Promise<Response> = Promise.reject(new Error('Worker did not handle the request'));
+    response.catch(() => {});
+    handler({ request, respondWith: promise => { response = promise; } });
+    assert.equal(await (await response).text(), 'cached module');
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test('updating one installation preserves offline files for another scope', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'studymate-worker-'));
   try {
