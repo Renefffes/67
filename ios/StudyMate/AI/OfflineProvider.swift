@@ -287,7 +287,10 @@ struct OfflineProvider: StudyAIProvider {
 
     private static func isSkip(_ text: String) -> Bool {
         ["show answer", "show the answer", "i don't know", "i dont know", "idk", "no idea", "skip", "give up", "tell me the answer"]
-            .contains { text.contains($0) }
+            .contains { phrase in
+                let bare = text.trimmingCharacters(in: .punctuationCharacters)
+                return bare == phrase || (phrase.contains(" ") && bare.hasPrefix(phrase))
+            }
     }
 
     private static func isNext(_ text: String) -> Bool {

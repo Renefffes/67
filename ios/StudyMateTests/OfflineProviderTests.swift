@@ -221,4 +221,12 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertEqual(String(TutorText.attributed("2*3*4 = 24").characters), "2*3*4 = 24")
         XCTAssertEqual(String(TutorText.attributed("a **bold** word").characters), "a bold word")
     }
+
+    func testAnswerContainingSkipIsGraded() {
+        let notes = "A jump rope is a rope used to skip."
+        let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me")
+        let history = [TutorTurn(isUser: true, text: "Quiz me"), TutorTurn(isUser: false, text: question)]
+        let reply = OfflineProvider.reply(notes: notes, history: history, question: "a rope used to skip")
+        XCTAssertTrue(reply.hasPrefix("Correct!"), reply)
+    }
 }
