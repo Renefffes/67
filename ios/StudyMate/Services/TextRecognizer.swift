@@ -39,7 +39,7 @@ enum TextRecognizer {
             let line = raw.trimmingCharacters(in: .whitespaces)
             guard !line.isEmpty else { continue }
             if let previous = result.last, let last = previous.last, let first = line.first,
-               first.isLowercase, !".!?:;。！？".contains(last) {
+               first.isLowercase, !".!?:;。！？".contains(last), !startsDefinition(line) {
                 result[result.count - 1] = last == "-" && previous.dropLast().last?.isLetter == true
                     ? String(previous.dropLast()) + line
                     : previous + " " + line
@@ -48,6 +48,10 @@ enum TextRecognizer {
             }
         }
         return result.joined(separator: "\n")
+    }
+
+    private static func startsDefinition(_ line: String) -> Bool {
+        line.range(of: #"^\S+(\s\S+){0,3}?\s*(:|=>|->|→|=)\s"#, options: .regularExpression) != nil
     }
 }
 
