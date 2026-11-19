@@ -353,4 +353,11 @@ final class OfflineProviderTests: XCTestCase {
         let history = [TutorTurn(isUser: false, text: "\(OfflineProvider.quizPrefix)Quick question: what is 2+2?\n\n\(OfflineProvider.quizHint)")]
         XCTAssertEqual(OfflineProvider.pendingQuizCard(history: history, cards: cards)?.back, "Four")
     }
+
+    func testTellMeMoreContinuesVocabularySummary() {
+        let notes = "Alpha\nBravo\nCharlie\nDelta\nEcho"
+        let first = OfflineProvider.reply(notes: notes, history: [], question: "Summarize")
+        let history = [TutorTurn(isUser: true, text: "Summarize"), TutorTurn(isUser: false, text: first)]
+        XCTAssertTrue(OfflineProvider.reply(notes: notes, history: history, question: "Tell me more").contains("Echo"))
+    }
 }

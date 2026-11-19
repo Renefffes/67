@@ -188,6 +188,9 @@ struct OfflineProvider: StudyAIProvider {
         guard !notes.trimmed.isEmpty else { return "Your notes are empty — add some notes first." }
         let cards = studySet(from: notes, title: title).flashcards
         let name = title.trimmed.isEmpty ? "your notes" : "“\(title.trimmed)”"
+        let points = all.isEmpty
+            ? notes.components(separatedBy: .newlines).map { stripBullet($0.trimmed) }.filter { !$0.isEmpty }
+            : all
         let alreadySaid = history.filter { !$0.isUser }.map(\.text).joined(separator: "\n")
 
         if let pending = pendingQuizCard(history: history, cards: cards), !isQuestion(lower) && !isQuizCommand(lower) || isSkip(lower) {
@@ -218,7 +221,7 @@ struct OfflineProvider: StudyAIProvider {
         if wantsMore(lower) {
             let onTopic = topic.map(index.sentences(containing:)) ?? []
             let related = ranked + onTopic.filter { !ranked.contains($0) }
-            let pool = related.isEmpty ? all : related
+            let pool = related.isEmpty ? points : related
             let more = pool.filter { !alreadySaid.contains($0) }.prefix(3)
             if !more.isEmpty {
                 return "Here's more from your notes\(topic.map { " about \($0)" } ?? ""):\n" + bullets(more)
@@ -235,9 +238,6 @@ struct OfflineProvider: StudyAIProvider {
             return "Here's what your notes say:\n" + bullets((followUp && !unseen.isEmpty ? unseen : ranked).prefix(3))
         }
         if lower.contains("summar") || lower.contains("explain") || lower.contains("main") || lower.contains("focus") || lower.contains("overview") {
-            let points = all.isEmpty
-                ? notes.components(separatedBy: .newlines).map { stripBullet($0.trimmed) }.filter { !$0.isEmpty }
-                : all
             return "The main ideas in \(name):\n" + bullets(points.prefix(4))
                 + (points.count > 4 ? "\n\nSay “tell me more” for the rest." : "")
         }
