@@ -493,4 +493,8 @@ final class OfflineProviderTests: XCTestCase {
     func testGroupedNumberIsNotADefinitionAnswer() {
         XCTAssertNil(OfflineProvider.definition(in: "Population: 1,000,000"))
     }
+
+    func testReflowJoinsShortLowercasePrefix() {
+        XCTAssertEqual(TextRecognizer.reflow(["Cells divide for re-", "production."]), "Cells divide for reproduction.")
+    }
 }
