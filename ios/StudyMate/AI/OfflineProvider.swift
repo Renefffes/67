@@ -246,8 +246,9 @@ struct OfflineProvider: StudyAIProvider {
     }
 
     static func pendingQuizCard(history: [TutorTurn], cards: [GeneratedCard]) -> GeneratedCard? {
-        guard let last = history.last, !last.isUser, let range = last.text.range(of: quizPrefix, options: .backwards) else { return nil }
-        let line = last.text[range.upperBound...].prefix { $0 != "\n" }
+        guard let last = history.last, !last.isUser,
+              let prompt = last.text.components(separatedBy: "\n").last(where: { $0.hasPrefix(quizPrefix) }) else { return nil }
+        let line = prompt.dropFirst(quizPrefix.count)
         let asked = history.filter { !$0.isUser && $0.text.contains(quizPrefix) }.count
         let askedCard = cards.isEmpty ? nil : cards[(asked - 1) % cards.count]
         if let askedCard, askedCard.front == line { return askedCard }

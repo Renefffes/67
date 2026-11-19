@@ -286,4 +286,10 @@ final class OfflineProviderTests: XCTestCase {
     func testTutorTextLeavesCodeSpansAlone() {
         XCTAssertEqual(String(TutorText.attributed("Run `2*3` now").characters), "Run 2*3 now")
     }
+
+    func testQuizPromptContainingMarkerIsGraded() {
+        let cards = [GeneratedCard(front: "Quick question: what is 2+2?", back: "Four")]
+        let history = [TutorTurn(isUser: false, text: "\(OfflineProvider.quizPrefix)Quick question: what is 2+2?\n\n\(OfflineProvider.quizHint)")]
+        XCTAssertEqual(OfflineProvider.pendingQuizCard(history: history, cards: cards)?.back, "Four")
+    }
 }
