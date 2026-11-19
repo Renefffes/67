@@ -41,16 +41,30 @@ struct OfflineProvider: StudyAIProvider {
             cards = [GeneratedCard(front: "Summarize \(name)", back: summary.isEmpty ? "(empty notes)" : String(summary.prefix(300)))]
         }
 
-        let fallbackPool = keywords(in: notes, limit: 20)
+        let fallbackPool = keywords(in: notes, limit: 30)
         var quiz: [GeneratedQuestion] = []
-        for (index, card) in cards.prefix(maxQuestions).enumerated() {
+        for (index, card) in cards.enumerated() where quiz.count < maxQuestions {
             let isCloze = clozeCards.contains(index)
             guard isCloze || definitionCards.contains(index) else { continue }
-            let others = cards.enumerated()
-                .filter { $0.offset != index && clozeCards.contains($0.offset) == isCloze && (isCloze || definitionCards.contains($0.offset)) }
-                .map(\.element.back)
+            let seed = stableHash(card.front)
+            let others = rotated(
+                cards.enumerated()
+                    .filter { $0.offset != index && clozeCards.contains($0.offset) == isCloze && (isCloze || definitionCards.contains($0.offset)) }
+                    .map(\.element.back),
+                by: seed
+            )
+            // Definitions only compete with other definitions: single keywords next to a full
+            // definition give the answer away. Blanks get keywords that are not already in the
+            // sentence, with the answer's look (number, capitalized, lowercase) first.
+            var candidates = others
+            if isCloze {
+                let questionWords = Set(words(in: card.front.lowercased()))
+                let pool = (others + rotated(fallbackPool, by: seed)).filter { !questionWords.contains($0.lowercased()) }
+                let shape = wordShape(card.back)
+                candidates = pool.filter { wordShape($0) == shape } + pool.filter { wordShape($0) != shape }
+            }
             var distractors: [String] = []
-            for candidate in others + fallbackPool where distractors.count < 3 {
+            for candidate in candidates where distractors.count < 3 {
                 let lower = candidate.lowercased()
                 if lower != card.back.lowercased() && !distractors.contains(where: { $0.lowercased() == lower }) {
                     distractors.append(candidate)
@@ -60,7 +74,9 @@ struct OfflineProvider: StudyAIProvider {
             var options = distractors
             let answerIndex = stableHash(card.front) % (options.count + 1)
             options.insert(card.back, at: answerIndex)
-            let question = isCloze ? "Fill in the blank: \(card.front)" : card.front
+            let question = isCloze
+                ? "Fill in the blank: \(card.front)"
+                : card.front.hasSuffix("?") ? card.front : "What does “\(card.front)” mean?"
             quiz.append(GeneratedQuestion(
                 question: question,
                 options: options,
@@ -145,6 +161,17 @@ struct OfflineProvider: StudyAIProvider {
         line.replacingOccurrences(of: #"^([•*·]\s*|[-–]\s+|\d+[.)]\s+)"#, with: "", options: .regularExpression)
     }
 
+    private static func rotated(_ items: [String], by seed: Int) -> [String] {
+        guard !items.isEmpty else { return items }
+        let start = seed % items.count
+        return Array(items[start...] + items[..<start])
+    }
+
+    private static func wordShape(_ word: String) -> Int {
+        guard let first = word.first else { return 0 }
+        return first.isNumber ? 1 : first.isUppercase ? 2 : 3
+    }
+
     static func stableHash(_ text: String) -> Int {
         text.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0x7fff_ffff }
     }
@@ -161,6 +188,9 @@ struct OfflineProvider: StudyAIProvider {
         guard !notes.trimmed.isEmpty else { return "Your notes are empty — add some notes first." }
         let cards = studySet(from: notes, title: title).flashcards
         let name = title.trimmed.isEmpty ? "your notes" : "“\(title.trimmed)”"
+        let points = all.isEmpty
+            ? notes.components(separatedBy: .newlines).map { stripBullet($0.trimmed) }.filter { !$0.isEmpty }
+            : all
         let alreadySaid = history.filter { !$0.isUser }.map(\.text).joined(separator: "\n")
 
         if let pending = pendingQuizCard(history: history, cards: cards), !isQuestion(lower) && !isQuizCommand(lower) || isSkip(lower) {
@@ -189,8 +219,9 @@ struct OfflineProvider: StudyAIProvider {
         let topic = index.label(for: previous ?? query)
 
         if wantsMore(lower) {
-            let related = index.rank(query, minShare: 0)
-            let pool = related.isEmpty ? all : related
+            let onTopic = index.sentences(containingAnyOf: query)
+            let related = ranked + onTopic.filter { !ranked.contains($0) }
+            let pool = related.isEmpty ? points : related
             let more = pool.filter { !alreadySaid.contains($0) }.prefix(3)
             if !more.isEmpty {
                 return "Here's more from your notes\(topic.map { " about \($0)" } ?? ""):\n" + bullets(more)
@@ -207,8 +238,8 @@ struct OfflineProvider: StudyAIProvider {
             return "Here's what your notes say:\n" + bullets((followUp && !unseen.isEmpty ? unseen : ranked).prefix(3))
         }
         if lower.contains("summar") || lower.contains("explain") || lower.contains("main") || lower.contains("focus") || lower.contains("overview") {
-            return "The main ideas in \(name):\n" + bullets(all.prefix(4))
-                + (all.count > 4 ? "\n\nSay “tell me more” for the rest." : "")
+            return "The main ideas in \(name):\n" + bullets(points.prefix(4))
+                + (points.count > 4 ? "\n\nSay “tell me more” for the rest." : "")
         }
         return "I couldn't find that in \(name). Try asking about \(topicList(notes))."
             + tipIfNeeded(alreadySaid)
@@ -241,8 +272,9 @@ struct OfflineProvider: StudyAIProvider {
     }
 
     static func pendingQuizCard(history: [TutorTurn], cards: [GeneratedCard]) -> GeneratedCard? {
-        guard let last = history.last, !last.isUser, let range = last.text.range(of: quizPrefix, options: .backwards) else { return nil }
-        let line = last.text[range.upperBound...].prefix { $0 != "\n" }
+        guard let last = history.last, !last.isUser,
+              let prompt = last.text.components(separatedBy: "\n").last(where: { $0.hasPrefix(quizPrefix) }) else { return nil }
+        let line = prompt.dropFirst(quizPrefix.count)
         let asked = history.filter { !$0.isUser && $0.text.contains(quizPrefix) }.count
         let askedCard = cards.isEmpty ? nil : cards[(asked - 1) % cards.count]
         if let askedCard, askedCard.front == line { return askedCard }
@@ -253,26 +285,45 @@ struct OfflineProvider: StudyAIProvider {
         let expected = answerWords(card.back)
         let given = answerWords(answer)
         let matched = expected.filter { word in given.contains { isWordForm($0, of: word) } }.count
+        let numbersMatch = numbers(in: decimalCommas(card.back)).isSubset(of: numbers(in: answer).union(numbers(in: decimalCommas(answer))))
         let correct = expected.isEmpty
             ? answer.lowercased().contains(card.back.lowercased())
-            : matched * 2 >= expected.count
+            : numbersMatch && matched * 2 >= expected.count
         if correct { return "Correct! The answer is: \(card.back)." }
-        if matched > 0 { return "Partly right. The full answer is: \(card.back)." }
+        if matched > 0, numbersMatch { return "Partly right. The full answer is: \(card.back)." }
         return "Not quite. The answer is: \(card.back)."
     }
 
     /// Keeps short tokens such as chemical symbols ("Fe") and numbers, unlike `contentWords`.
     private static func answerWords(_ text: String) -> Set<String> {
-        Set(words(in: text.lowercased()).filter { !stopWords.contains($0) }.map(normalized))
+        Set(words(in: text.lowercased()).filter { !stopWords.contains($0) })
     }
 
-    /// "divide" matches "divides" or "divided", but "titan" does not match "titanium".
+    /// Reads a lone comma inside a number as a decimal ("9,81" is 9.81) but leaves lists such as "2,3,5" alone.
+    private static func decimalCommas(_ text: String) -> String {
+        text.replacingOccurrences(of: #"(?<![0-9,])([0-9]+),([0-9]+)(?!,?[0-9])"#, with: "$1.$2", options: .regularExpression)
+    }
+
+    /// Whole numbers as written, so "9.82" is not "9.81" and "40" is not "-40"; the dash in "1939-1945" is a range, not a sign.
+    private static func numbers(in text: String) -> Set<String> {
+        Set(text.matches(of: /-?[0-9]+(?:\.[0-9]+)?/).map { match in
+            let afterDigit = match.range.lowerBound > text.startIndex && text[text.index(before: match.range.lowerBound)].isNumber
+            return String(afterDigit && match.output.hasPrefix("-") ? match.output.dropFirst() : match.output[...])
+        })
+    }
+
+    /// "divides" matches "divided" or "divide", and "masses" matches "mass", but "titan" does not match "titanium".
     private static func isWordForm(_ a: String, of b: String) -> Bool {
-        let (short, long) = a.count <= b.count ? (a, b) : (b, a)
-        guard short.count >= 3 || short == long, long.hasPrefix(short) else { return false }
-        let suffix = String(long.dropFirst(short.count))
-        if suffix == "d" { return short.hasSuffix("e") }
-        return ["", "s", "es", "ed", "ing", "ly"].contains(suffix)
+        !stems(a).isDisjoint(with: stems(b))
+    }
+
+    private static func stems(_ word: String) -> Set<String> {
+        var stems: Set<String> = [word]
+        for suffix in ["s", "es", "d", "ed", "ing", "ly"] where word.hasSuffix(suffix) {
+            let stem = String(word.dropLast(suffix.count))
+            if stem.count >= 3, suffix != "d" || stem.hasSuffix("e") { stems.insert(stem) }
+        }
+        return stems
     }
 
     // MARK: Tutor intents
@@ -290,7 +341,8 @@ struct OfflineProvider: StudyAIProvider {
     private static func isSkip(_ text: String) -> Bool {
         ["show answer", "show the answer", "i don't know", "i dont know", "idk", "no idea", "skip", "give up", "tell me the answer"]
             .contains { phrase in
-                let bare = text.trimmingCharacters(in: .punctuationCharacters)
+                let bare = text.components(separatedBy: CharacterSet.letters.union(["'", " "]).inverted).joined()
+                    .split(separator: " ").filter { $0 != "please" && $0 != "pls" }.joined(separator: " ")
                 return bare == phrase || (phrase.contains(" ") && bare.hasPrefix(phrase))
             }
     }
@@ -311,7 +363,7 @@ struct OfflineProvider: StudyAIProvider {
     private static func isFollowUp(_ text: String) -> Bool {
         let words = text.components(separatedBy: CharacterSet.alphanumerics.union(["'"]).inverted).filter { !$0.isEmpty }
         let cues: Set<String> = ["it", "its", "it's", "that", "this", "they", "them", "those", "these", "he", "she", "more", "else"]
-        let bareWhy = words.contains("why") && contentWords(text).isEmpty
+        let bareWhy = words.contains("why") && contentWords(text).subtracting(["say", "said", "mean", "think"]).isEmpty
         return words.count <= 8 && (words.contains { cues.contains($0) } || bareWhy) || wantsMore(text)
     }
 
@@ -366,15 +418,21 @@ struct OfflineProvider: StudyAIProvider {
             weights = frequency.mapValues { log((count + 1) / Double($0)) + 0.1 }
         }
 
-        func rank(_ query: Set<String>, minShare: Double = 0.5) -> [String] {
+        func rank(_ query: Set<String>) -> [String] {
             let scored = sentences.indices
                 .map { (index: $0, score: words[$0].intersection(query).reduce(0) { $0 + (weights[$1] ?? 0) }) }
                 .filter { $0.score > 0 }
             guard let best = scored.map(\.score).max() else { return [] }
             return scored
-                .filter { $0.score >= best * minShare }
+                .filter { $0.score >= best * 0.5 }
                 .sorted { $0.score > $1.score || ($0.score == $1.score && $0.index < $1.index) }
                 .map { sentences[$0.index] }
+        }
+
+        /// Sentences containing any query word that isn't common to most of the notes (like "cell").
+        func sentences(containingAnyOf query: Set<String>) -> [String] {
+            let distinctive = query.filter { word in words.filter { $0.contains(word) }.count * 2 <= max(sentences.count, 2) }
+            return sentences.indices.filter { !words[$0].isDisjoint(with: distinctive) }.map { sentences[$0] }
         }
 
         func label(for query: Set<String>) -> String? {

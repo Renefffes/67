@@ -59,6 +59,47 @@ final class StudyMateUITests: XCTestCase {
         snapshot("5-quiz-score")
     }
 
+    func testQuizRetryMissedQuestionsKeepsFullQuizScore() {
+        createSampleDeck()
+        app.buttons["quizLink"].tap()
+
+        var missedPrompt: String?
+        var total = 0
+        while !app.staticTexts["quizScore"].exists {
+            XCTAssertTrue(app.staticTexts["quizQuestion"].waitForExistence(timeout: 5))
+            let prompt = app.staticTexts["quizQuestion"].label
+            if missedPrompt == nil {
+                missedPrompt = prompt
+                answer(prompt, correctly: false)
+                XCTAssertTrue(app.staticTexts["quizFeedback"].label.hasPrefix("Not quite"))
+            } else {
+                answer(prompt, correctly: true)
+                XCTAssertEqual(app.staticTexts["quizFeedback"].label, "Correct!")
+            }
+            app.buttons["quizNextButton"].tap()
+            total += 1
+            XCTAssertLessThan(total, 20)
+        }
+        XCTAssertEqual(app.staticTexts["quizScore"].label, "\(total - 1) / \(total)")
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "quizMissedRow").count, 1)
+        snapshot("5-quiz-review")
+
+        app.buttons["quizRetryMissedButton"].tap()
+        XCTAssertEqual(app.staticTexts["quizProgress"].label, "Question 1 of 1")
+        XCTAssertEqual(app.staticTexts["quizQuestion"].label, missedPrompt)
+        answer(app.staticTexts["quizQuestion"].label, correctly: true)
+        app.buttons["quizNextButton"].tap()
+        XCTAssertEqual(app.staticTexts["quizScore"].label, "1 / 1")
+        XCTAssertFalse(app.buttons["quizRetryMissedButton"].exists)
+
+        app.buttons["quizRetryButton"].tap()
+        XCTAssertEqual(app.staticTexts["quizProgress"].label, "Question 1 of \(total)")
+        XCTAssertEqual(app.staticTexts["quizRunningScore"].label, "Score: 0")
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.staticTexts["Last quiz: \(total - 1) / \(total)"].waitForExistence(timeout: 5))
+    }
+
     func testTutorAnswersQuestionAboutNotes() {
         createSampleDeck()
         app.buttons["tutorLink"].tap()
@@ -187,11 +228,125 @@ final class StudyMateUITests: XCTestCase {
         snapshot("9-resume")
     }
 
+    func testFirstLaunchSampleNotesShortcut() {
+        XCTAssertTrue(app.buttons["emptyStateSettingsButton"].exists)
+        app.buttons["emptyStateSampleButton"].tap()
+        XCTAssertEqual(app.textFields["deckTitleField"].value as? String, "Biology – The Cell")
+        XCTAssertTrue(app.buttons["generateButton"].isEnabled)
+        app.buttons["generateButton"].tap()
+        XCTAssertTrue(app.buttons["flashcardsLink"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Biology – The Cell"].exists)
+    }
+
+    func testSettingsWarnsUntilGeminiKeyIsSaved() {
+        app.buttons["settingsButton"].tap()
+        app.buttons["enginePicker"].firstMatch.tap()
+        app.buttons["Google Gemini"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["engineWarning"].waitForExistence(timeout: 5))
+        XCTAssertTrue(activeEngineLabel.label.contains("Offline mode"), activeEngineLabel.label)
+
+        let field = app.textFields["geminiKeyField"]
+        field.tap()
+        field.typeText("sk-wrong")
+        XCTAssertTrue(app.staticTexts["geminiKeyFormatHint"].exists)
+        field.typeText(String(repeating: "\u{8}", count: 8) + "AIzaTestKey1234")
+        XCTAssertFalse(app.staticTexts["geminiKeyFormatHint"].exists)
+        app.buttons["saveGeminiKeyButton"].tap()
+
+        XCTAssertTrue(app.descendants(matching: .any)["geminiKeySaved"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["engineWarning"].exists)
+        XCTAssertTrue(activeEngineLabel.label.contains("Google Gemini"), activeEngineLabel.label)
+        snapshot("8-settings-gemini-key")
+
+        app.buttons["settingsDoneButton"].tap()
+        app.buttons["settingsButton"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["geminiKeySaved"].waitForExistence(timeout: 5))
+        app.buttons["removeGeminiKeyButton"].tap()
+        XCTAssertTrue(app.textFields["geminiKeyField"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["engineWarning"].exists)
+    }
+
+    func testAppleIntelligenceChoiceExplainsFallback() {
+        app.buttons["settingsButton"].tap()
+        app.buttons["enginePicker"].firstMatch.tap()
+        app.buttons["Apple Intelligence"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["engineWarning"].waitForExistence(timeout: 5))
+        XCTAssertTrue(activeEngineLabel.label.contains("Offline mode"), activeEngineLabel.label)
+    }
+
+    func testSearchAndDeleteDecks() {
+        createSampleDeck()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["newDeckButton"].tap()
+        let title = app.textFields["deckTitleField"]
+        title.tap()
+        title.typeText("Chemistry")
+        let notes = app.textViews["notesEditor"]
+        notes.tap()
+        notes.typeText("Osmosis is the movement of water across a membrane.")
+        app.buttons["generateButton"].tap()
+        XCTAssertTrue(app.buttons["flashcardsLink"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        let search = app.searchFields.firstMatch
+        if !search.waitForExistence(timeout: 2) { app.swipeDown() }
+        search.tap()
+        search.typeText("Chem")
+        XCTAssertTrue(app.staticTexts["Chemistry"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Biology – The Cell"].exists)
+        search.typeText(String(repeating: "\u{8}", count: 4))
+
+        let biology = app.staticTexts["Biology – The Cell"]
+        XCTAssertTrue(biology.waitForExistence(timeout: 5))
+        biology.swipeLeft()
+        app.buttons["Delete"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["confirmDeleteDeckButton"].firstMatch.waitForExistence(timeout: 5))
+        app.buttons["confirmDeleteDeckButton"].firstMatch.tap()
+        XCTAssertFalse(biology.waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["Chemistry"].exists)
+    }
+
+    func testEmptyStateReachableWithLargestText() {
+        app.terminate()
+        app.launchArguments = ["-uiTesting", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        let create = app.buttons["emptyStateNewDeckButton"]
+        XCTAssertTrue(create.waitForExistence(timeout: 5))
+        if !create.isHittable { app.swipeUp() }
+        XCTAssertTrue(create.isHittable)
+        create.tap()
+        XCTAssertTrue(app.textFields["deckTitleField"].waitForExistence(timeout: 5))
+    }
+
+    private var activeEngineLabel: XCUIElement {
+        app.staticTexts["activeEngineLabel"].exists ? app.staticTexts["activeEngineLabel"] : app.otherElements["activeEngineLabel"]
+    }
+
     private func createSampleDeck() {
         app.buttons["newDeckButton"].tap()
         app.buttons["sampleNotesButton"].tap()
         app.buttons["generateButton"].tap()
         XCTAssertTrue(app.buttons["flashcardsLink"].waitForExistence(timeout: 10))
+    }
+
+    private static let sampleAnswers = [
+        "What is the cell?": "The basic unit of life",
+        "What is the nucleus?": "The control center of the cell that stores DNA",
+        "What are Mitochondria?": "Organelles that produce energy for the cell through respiration",
+        "What are Ribosomes?": "Tiny structures that build proteins",
+        "What is Osmosis?": "The movement of water across a semi-permeable membrane",
+        "What is Photosynthesis?": "The process plants use to turn sunlight, water and carbon dioxide into glucose and oxygen",
+        "What are Chloroplasts?": "Found in plant cells and contain chlorophyll",
+        "Fill in the blank: The cell _____ controls what enters and leaves the cell": "membrane",
+    ]
+
+    private func answer(_ prompt: String, correctly: Bool) {
+        let expected = try? XCTUnwrap(Self.sampleAnswers[prompt], "Unknown question: \(prompt)")
+        let options = (0..<4).map { app.buttons["quizOption_\($0)"] }.filter(\.exists)
+        let option = options.first { ($0.label == expected) == correctly }
+        XCTAssertNotNil(option, prompt)
+        option?.tap()
+        XCTAssertTrue(app.staticTexts["quizFeedback"].waitForExistence(timeout: 5))
     }
 
     private func snapshot(_ name: String) {

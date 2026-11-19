@@ -81,6 +81,75 @@ final class OfflineProviderTests: XCTestCase {
         }
     }
 
+    func testWrongOptionsVaryBetweenQuestions() {
+        let set = OfflineProvider.studySet(from: SampleNotes.text, title: SampleNotes.title)
+        let wrongSets = set.quiz.map { question in
+            Set(question.options.enumerated().filter { $0.offset != question.answerIndex }.map(\.element))
+        }
+        XCTAssertGreaterThan(Set(wrongSets).count, wrongSets.count / 2)
+    }
+
+    func testDefinitionQuestionsOnlyOfferDefinitions() {
+        let notes = "Photosynthesis is the process plants use to make food from light. Osmosis is the movement of water across a membrane."
+        let set = OfflineProvider.studySet(from: notes, title: "")
+        XCTAssertEqual(set.quiz.count, 2)
+        for question in set.quiz {
+            XCTAssertFalse(question.options.contains("Photosynthesis"), "\(question.options)")
+            XCTAssertFalse(question.options.contains("Osmosis"), "\(question.options)")
+        }
+    }
+
+    func testSingleDefinitionMakesNoWordSaladQuestion() {
+        let set = OfflineProvider.studySet(from: "Osmosis is the movement of water across a membrane.", title: "")
+        XCTAssertTrue(set.quiz.isEmpty, "\(set.quiz)")
+    }
+
+    func testBlankOptionsAreNotWordsFromTheSentence() {
+        let set = OfflineProvider.studySet(from: SampleNotes.text, title: SampleNotes.title)
+        let cloze = try? XCTUnwrap(set.quiz.first { $0.question.hasPrefix("Fill in the blank") })
+        let sentenceWords = Set((cloze?.question ?? "").lowercased().components(separatedBy: CharacterSet.letters.inverted))
+        for (offset, option) in (cloze?.options ?? []).enumerated() where offset != cloze?.answerIndex {
+            XCTAssertFalse(sentenceWords.contains(option.lowercased()), option)
+            XCTAssertEqual(option.first?.isLowercase, true, "Options should look like the lowercase answer: \(option)")
+        }
+    }
+
+    func testSkippedCardDoesNotShortenTheQuiz() {
+        let notes = """
+        Osmosis is the movement of water across a membrane.
+        The heart pumps blood through arteries.
+        Plants absorb sunlight through leaves.
+        Neurons carry signals along axons.
+        Enzymes speed up chemical reactions.
+        Bacteria reproduce by binary fission.
+        Glaciers carve valleys over centuries.
+        Volcanoes release magma from the mantle.
+        Earthquakes shake the tectonic plates.
+        """
+        let set = OfflineProvider.studySet(from: notes, title: "")
+        XCTAssertGreaterThan(set.flashcards.count, OfflineProvider.maxQuestions)
+        XCTAssertEqual(set.quiz.count, OfflineProvider.maxQuestions)
+    }
+
+    func testTermNotesAskWhatTheTermMeans() {
+        let notes = "- Mitosis: cell division producing two identical cells\n- Meiosis: cell division producing four gametes"
+        let set = OfflineProvider.studySet(from: notes, title: "")
+        XCTAssertEqual(set.quiz.first?.question, "What does “Mitosis” mean?")
+    }
+
+    func testShuffledQuizKeepsTheRightAnswer() {
+        let items = (0..<6).map { QuizItem(id: $0, prompt: "Q\($0)", options: ["a\($0)", "b\($0)", "c\($0)", "d\($0)"], answerIndex: $0 % 4, explanation: "") }
+        var generator = SeededGenerator(seed: 7)
+        let shuffled = QuizItem.shuffled(items, using: &generator)
+        XCTAssertEqual(Set(shuffled.map(\.id)), Set(items.map(\.id)))
+        for item in shuffled {
+            let original = items[item.id]
+            XCTAssertEqual(item.correctAnswer, original.correctAnswer)
+            XCTAssertEqual(Set(item.options), Set(original.options))
+        }
+        XCTAssertNotEqual(shuffled.map(\.id), items.map(\.id))
+    }
+
     func testEmptyishNotesStillProduceACard() {
         let set = OfflineProvider.studySet(from: "Cells", title: "Bio")
         XCTAssertEqual(set.flashcards.count, 1)
@@ -142,6 +211,23 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(OfflineProvider.grade(answer: "Titan", card: titan).hasPrefix("Correct!"))
         let iron = GeneratedCard(front: "Which element has the symbol Fe?", back: "Fe (iron)")
         XCTAssertTrue(OfflineProvider.grade(answer: "Fe", card: iron).hasPrefix("Correct!"))
+        let mass = GeneratedCard(front: "What does a balance measure?", back: "mass")
+        XCTAssertTrue(OfflineProvider.grade(answer: "masses", card: mass).hasPrefix("Correct!"))
+        let g = GeneratedCard(front: "What is g on Earth?", back: "9.81 m/s²")
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.81", card: g).hasPrefix("Correct!"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.82 m/s", card: g).hasPrefix("Not quite"))
+        let freezing = GeneratedCard(front: "Where do °C and °F meet?", back: "-40 degrees")
+        XCTAssertTrue(OfflineProvider.grade(answer: "40 degrees", card: freezing).hasPrefix("Not quite"))
+        let war = GeneratedCard(front: "When was WWII?", back: "1939-1945")
+        XCTAssertTrue(OfflineProvider.grade(answer: "1939 to 1945", card: war).hasPrefix("Correct!"))
+        let primes = GeneratedCard(front: "First three primes?", back: "2,3,5")
+        XCTAssertTrue(OfflineProvider.grade(answer: "2, 3, 5", card: primes).hasPrefix("Correct!"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "9,81", card: g).hasPrefix("Correct!"))
+        let dutch = GeneratedCard(front: "Wat is g op aarde?", back: "9,81 m/s²")
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.81", card: dutch).hasPrefix("Correct!"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "9 and 81", card: dutch).hasPrefix("Not quite"))
+        let mitosis = GeneratedCard(front: "What does mitosis do?", back: "divides cells")
+        XCTAssertTrue(OfflineProvider.grade(answer: "it divided the cell", card: mitosis).hasPrefix("Correct!"))
     }
 
     func testTutorGradesTheAskedCardWhenPromptsRepeat() {
@@ -241,5 +327,58 @@ final class OfflineProviderTests: XCTestCase {
         let history = [TutorTurn(isUser: true, text: "What does the nucleus do?"), TutorTurn(isUser: false, text: first)]
         let reply = OfflineProvider.reply(notes: notes, history: history, question: "Why is the sky blue?")
         XCTAssertFalse(reply.contains("stores DNA"), reply)
+    }
+
+    func testTellMeMoreStaysOnTopic() {
+        let notes = "The nucleus is the control center of the cell. The nucleus stores DNA. A cell membrane surrounds every cell. Cells divide by mitosis."
+        let first = OfflineProvider.reply(notes: notes, history: [], question: "What is the nucleus?")
+        let history = [TutorTurn(isUser: true, text: "What is the nucleus?"), TutorTurn(isUser: false, text: first)]
+        let more = OfflineProvider.reply(notes: notes, history: history, question: "Tell me more")
+        XCTAssertFalse(more.contains("divide by mitosis"), more)
+        XCTAssertFalse(more.contains("surrounds every cell"), more)
+    }
+
+    func testPoliteSkipRevealsAnswer() {
+        let notes = "Osmosis is the movement of water across a membrane."
+        let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me")
+        let history = [TutorTurn(isUser: true, text: "Quiz me"), TutorTurn(isUser: false, text: question)]
+        for skip in ["Skip, please", "Please show the answer."] {
+            let reply = OfflineProvider.reply(notes: notes, history: history, question: skip)
+            XCTAssertTrue(reply.hasPrefix("The answer is:"), reply)
+        }
+    }
+
+    func testSummaryOfVocabularyNotesListsTheWords() {
+        let reply = OfflineProvider.reply(notes: "Mitochondria\nRibosome", history: [], question: "Summarize")
+        XCTAssertTrue(reply.contains("Mitochondria") && reply.contains("Ribosome"), reply)
+    }
+
+    func testWhyDoYouSaySoIsAFollowUp() {
+        let notes = "The nucleus stores DNA. Mitochondria produce energy."
+        let first = OfflineProvider.reply(notes: notes, history: [], question: "What does the nucleus do?")
+        let history = [TutorTurn(isUser: true, text: "What does the nucleus do?"), TutorTurn(isUser: false, text: first)]
+        let reply = OfflineProvider.reply(notes: notes, history: history, question: "Why do you say so?")
+        XCTAssertTrue(reply.contains("stores DNA"), reply)
+    }
+
+    func testTutorTextLeavesCodeSpansAlone() {
+        XCTAssertEqual(String(TutorText.attributed("Run `2*3` now").characters), "Run 2*3 now")
+    }
+
+    func testQuizPromptContainingMarkerIsGraded() {
+        let cards = [GeneratedCard(front: "Quick question: what is 2+2?", back: "Four")]
+        let history = [TutorTurn(isUser: false, text: "\(OfflineProvider.quizPrefix)Quick question: what is 2+2?\n\n\(OfflineProvider.quizHint)")]
+        XCTAssertEqual(OfflineProvider.pendingQuizCard(history: history, cards: cards)?.back, "Four")
+    }
+
+    func testTellMeMoreContinuesVocabularySummary() {
+        let notes = "Alpha\nBravo\nCharlie\nDelta\nEcho"
+        let first = OfflineProvider.reply(notes: notes, history: [], question: "Summarize")
+        let history = [TutorTurn(isUser: true, text: "Summarize"), TutorTurn(isUser: false, text: first)]
+        XCTAssertTrue(OfflineProvider.reply(notes: notes, history: history, question: "Tell me more").contains("Echo"))
+    }
+
+    func testEscapedBacktickDoesNotStartCode() {
+        XCTAssertEqual(String(TutorText.attributed("\\` then 2*3*4").characters), "` then 2*3*4")
     }
 }

@@ -18,6 +18,9 @@ struct StudyMateApp: App {
         }
         if AppEnvironment.isUITesting {
             UIView.setAnimationsEnabled(false)
+            UserDefaults.standard.removeObject(forKey: StudyAI.engineKey)
+            UserDefaults.standard.removeObject(forKey: StudyAI.geminiModelKey)
+            Keychain.geminiAPIKey = nil
         }
     }
 
