@@ -76,6 +76,27 @@ final class StudyMateUITests: XCTestCase {
         snapshot("6-tutor")
     }
 
+    func testTutorQuizWaitsForStudentAnswer() {
+        createSampleDeck()
+        app.buttons["tutorLink"].tap()
+        app.buttons["Quiz me on this"].tap()
+
+        let question = app.staticTexts.matching(identifier: "assistantMessage").element(boundBy: 1)
+        XCTAssertTrue(question.waitForExistence(timeout: 10))
+        XCTAssertTrue(question.label.hasPrefix("Quick question:"), question.label)
+        XCTAssertFalse(question.label.contains("basic unit of life"), question.label)
+
+        let input = app.textFields["chatInput"]
+        input.tap()
+        input.typeText("The basic unit of life")
+        app.buttons["chatSendButton"].tap()
+        let feedback = app.staticTexts.matching(identifier: "assistantMessage").element(boundBy: 2)
+        XCTAssertTrue(feedback.waitForExistence(timeout: 10))
+        XCTAssertTrue(feedback.label.hasPrefix("Correct!"), feedback.label)
+        XCTAssertTrue(feedback.isHittable, "The newest reply should be scrolled into view")
+        snapshot("8-tutor-quiz")
+    }
+
     func testSettingsShowsActiveEngine() {
         app.buttons["settingsButton"].tap()
         let active = app.staticTexts["activeEngineLabel"].exists ? app.staticTexts["activeEngineLabel"] : app.otherElements["activeEngineLabel"]
