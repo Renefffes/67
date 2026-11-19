@@ -234,4 +234,12 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(OfflineProvider.grade(answer: "card", card: GeneratedCard(front: "What has four wheels?", back: "Car")).hasPrefix("Not quite"))
         XCTAssertTrue(OfflineProvider.grade(answer: "divided", card: GeneratedCard(front: "What happens?", back: "Divide")).hasPrefix("Correct!"))
     }
+
+    func testNewWhyQuestionIsNotAFollowUp() {
+        let notes = "The nucleus stores DNA. Mitochondria produce energy."
+        let first = OfflineProvider.reply(notes: notes, history: [], question: "What does the nucleus do?")
+        let history = [TutorTurn(isUser: true, text: "What does the nucleus do?"), TutorTurn(isUser: false, text: first)]
+        let reply = OfflineProvider.reply(notes: notes, history: history, question: "Why is the sky blue?")
+        XCTAssertFalse(reply.contains("stores DNA"), reply)
+    }
 }

@@ -310,8 +310,9 @@ struct OfflineProvider: StudyAIProvider {
 
     private static func isFollowUp(_ text: String) -> Bool {
         let words = text.components(separatedBy: CharacterSet.alphanumerics.union(["'"]).inverted).filter { !$0.isEmpty }
-        let cues: Set<String> = ["it", "its", "it's", "that", "this", "they", "them", "those", "these", "he", "she", "more", "else", "why"]
-        return words.count <= 8 && words.contains { cues.contains($0) } || wantsMore(text)
+        let cues: Set<String> = ["it", "its", "it's", "that", "this", "they", "them", "those", "these", "he", "she", "more", "else"]
+        let bareWhy = words.contains("why") && contentWords(text).isEmpty
+        return words.count <= 8 && (words.contains { cues.contains($0) } || bareWhy) || wantsMore(text)
     }
 
     private static func smallTalkReply(_ text: String, name: String, topics: String) -> String? {
