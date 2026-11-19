@@ -1,3 +1,4 @@
+import NaturalLanguage
 import PhotosUI
 import SwiftData
 import SwiftUI
@@ -16,21 +17,35 @@ struct NewDeckView: View {
     @State private var isReadingPhotos = false
     @State private var isGenerating = false
     @State private var errorMessage: String?
+    @State private var photoMessage: String?
+    @FocusState private var focusedField: Field?
 
-    private var wordCount: Int { notes.split(whereSeparator: \.isWhitespace).count }
+    private enum Field { case title, notes }
+
+    private var wordCount: Int {
+        let tokenizer = NLTokenizer(unit: .word)
+        tokenizer.string = notes
+        return tokenizer.tokens(for: notes.startIndex..<notes.endIndex).count
+    }
+    private var wordCountText: String {
+        let count = "\(wordCount) \(wordCount == 1 ? "word" : "words")"
+        return (1..<15).contains(wordCount) ? "\(count) · Add a few full sentences or definitions for better flashcards." : count
+    }
     private var canGenerate: Bool { !notes.trimmed.isEmpty && !isGenerating && !isReadingPhotos }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Title") {
-                    TextField("e.g. Biology – The Cell", text: $title)
+                    TextField(notes.trimmed.isEmpty ? "e.g. Biology – The Cell" : defaultTitle, text: $title)
                         .accessibilityIdentifier("deckTitleField")
+                        .focused($focusedField, equals: .title)
                 }
                 Section {
                     TextEditor(text: $notes)
                         .frame(minHeight: 180)
                         .accessibilityIdentifier("notesEditor")
+                        .focused($focusedField, equals: .notes)
                         .overlay(alignment: .topLeading) {
                             if notes.isEmpty {
                                 Text("Paste or type your notes here…")
@@ -43,7 +58,7 @@ struct NewDeckView: View {
                 } header: {
                     Text("Your notes")
                 } footer: {
-                    Text("\(wordCount) words")
+                    Text(wordCountText).accessibilityIdentifier("wordCountLabel")
                 }
                 Section("Add from a photo") {
                     if VNDocumentCameraViewController.isSupported {
@@ -59,6 +74,10 @@ struct NewDeckView: View {
                             ProgressView()
                             Text("Reading text from your photos…").foregroundStyle(.secondary)
                         }
+                    } else if let photoMessage {
+                        Label(photoMessage, systemImage: "checkmark.circle")
+                            .foregroundStyle(.secondary)
+                            .accessibilityIdentifier("photoTextAdded")
                     }
                 }
                 Section {
@@ -74,6 +93,7 @@ struct NewDeckView: View {
                     Section { Text(errorMessage).foregroundStyle(.red) }
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("New deck")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -84,6 +104,10 @@ struct NewDeckView: View {
                     Button("Generate") { Task { await generate() } }
                         .disabled(!canGenerate)
                         .accessibilityIdentifier("generateButton")
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focusedField = nil }
                 }
             }
             .overlay {
@@ -131,6 +155,8 @@ struct NewDeckView: View {
 
     private func addText(from images: [UIImage]) async {
         guard !images.isEmpty else { return }
+        focusedField = nil
+        photoMessage = nil
         isReadingPhotos = true
         defer { isReadingPhotos = false }
         do {
@@ -140,6 +166,8 @@ struct NewDeckView: View {
             } else {
                 errorMessage = nil
                 notes = notes.trimmed.isEmpty ? text : notes + "\n\n" + text
+                let photos = images.count == 1 ? "1 photo" : "\(images.count) photos"
+                photoMessage = "Added text from \(photos) to your notes. Check it for misread words before generating."
             }
         } catch {
             errorMessage = "Couldn't read the photos: \(error.localizedDescription)"
@@ -170,6 +198,8 @@ struct NewDeckView: View {
     private var defaultTitle: String {
         let firstLine = notes.trimmed.components(separatedBy: .newlines).first ?? ""
         let words = firstLine.split(separator: " ").prefix(5).joined(separator: " ")
+            .replacingOccurrences(of: #"[\s!?.:;,*#-]+$"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"^[#*\s-]+|\*\*"#, with: "", options: .regularExpression)
         return words.isEmpty ? "Untitled deck" : words
     }
 }
