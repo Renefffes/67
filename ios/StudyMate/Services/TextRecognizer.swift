@@ -52,7 +52,7 @@ enum TextRecognizer {
     }
 
     private static func startsDefinition(_ line: String) -> Bool {
-        line.range(of: #"^\S+(\s\S+){0,3}?\s*(:|=>|->|→|=)\s"#, options: .regularExpression) != nil
+        line.range(of: #"^\S+(\s\S+){0,3}?\s*(:|=>|->|→|=|[-–—])\s"#, options: .regularExpression) != nil
     }
 }
 

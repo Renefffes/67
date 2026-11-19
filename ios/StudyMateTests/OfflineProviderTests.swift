@@ -462,4 +462,8 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertEqual(TextRecognizer.reflow(["Table salt releases Cl-", "ions in water."]), "Table salt releases Cl- ions in water.")
         XCTAssertEqual(TextRecognizer.reflow(["Photo-", "synthesis makes sugar."]), "Photosynthesis makes sugar.")
     }
+
+    func testReflowKeepsLowercaseDashEntriesApart() {
+        XCTAssertEqual(TextRecognizer.reflow(["osmosis - movement of water", "diffusion - spreading of particles"]), "osmosis - movement of water\ndiffusion - spreading of particles")
+    }
 }
