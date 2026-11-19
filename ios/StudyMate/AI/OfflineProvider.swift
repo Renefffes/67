@@ -300,7 +300,8 @@ struct OfflineProvider: StudyAIProvider {
     private static func isSkip(_ text: String) -> Bool {
         ["show answer", "show the answer", "i don't know", "i dont know", "idk", "no idea", "skip", "give up", "tell me the answer"]
             .contains { phrase in
-                let bare = text.trimmingCharacters(in: .punctuationCharacters)
+                let bare = text.components(separatedBy: CharacterSet.letters.union(["'", " "]).inverted).joined()
+                    .split(separator: " ").filter { $0 != "please" && $0 != "pls" }.joined(separator: " ")
                 return bare == phrase || (phrase.contains(" ") && bare.hasPrefix(phrase))
             }
     }

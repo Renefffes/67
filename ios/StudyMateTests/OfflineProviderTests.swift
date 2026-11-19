@@ -259,4 +259,14 @@ final class OfflineProviderTests: XCTestCase {
         let reply = OfflineProvider.reply(notes: notes, history: history, question: "Describe the movement of water across a membrane")
         XCTAssertTrue(reply.hasPrefix("Correct!"), reply)
     }
+
+    func testPoliteSkipRevealsAnswer() {
+        let notes = "Osmosis is the movement of water across a membrane."
+        let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me")
+        let history = [TutorTurn(isUser: true, text: "Quiz me"), TutorTurn(isUser: false, text: question)]
+        for skip in ["Skip, please", "Please show the answer."] {
+            let reply = OfflineProvider.reply(notes: notes, history: history, question: skip)
+            XCTAssertTrue(reply.hasPrefix("The answer is:"), reply)
+        }
+    }
 }
