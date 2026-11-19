@@ -61,7 +61,7 @@ struct QuizView: View {
     @State private var selected: Int?
     @State private var answers: [Int: Int] = [:]
     @State private var finished = false
-    @State private var roundSourceIDs: [PersistentIdentifier] = []
+    @State private var roundSources: [ObjectIdentifier] = []
     @State private var generator = SeededGenerator(seed: AppEnvironment.isUITesting ? 42 : .random(in: 0...UInt64.max))
 
     private var score: Int { round.filter { answers[$0.id] == $0.answerIndex }.count }
@@ -276,14 +276,14 @@ struct QuizView: View {
             index += 1
         } else {
             finished = true
-            guard isFullQuiz, deck.sortedQuestions.map(\.persistentModelID) == roundSourceIDs else { return }
+            guard isFullQuiz, deck.sortedQuestions.map(ObjectIdentifier.init) == roundSources else { return }
             deck.lastQuizScore = score
             deck.lastQuizTotal = round.count
         }
     }
 
     private func start(with items: [QuizItem], full: Bool) {
-        roundSourceIDs = deck.sortedQuestions.map(\.persistentModelID)
+        roundSources = deck.sortedQuestions.map(ObjectIdentifier.init)
         round = QuizItem.shuffled(items, using: &generator)
         isFullQuiz = full
         index = 0
