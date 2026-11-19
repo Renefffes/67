@@ -502,4 +502,8 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertEqual(TextRecognizer.reflow(["In water, salt releases", "Cl- ions and sodium."]).contains("\n"), false)
         XCTAssertEqual(TextRecognizer.reflow(["Table salt is made of", "lowercase cl- and na+ ions."]).contains("\n"), false)
     }
+
+    func testKatakanaLongVowelTermIsADefinition() {
+        XCTAssertEqual(OfflineProvider.definition(in: "エネルギーは仕事をする能力")?.term, "エネルギー")
+    }
 }

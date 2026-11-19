@@ -115,7 +115,7 @@ struct OfflineProvider: StudyAIProvider {
             (#"^(.{2,60}?)\s+[-–—]\s+(.{3,})$"#, false),
             (#"^(.{2,60}?)\s*(?:=>|->|→|=)\s*(.{3,})$"#, false),
             (#"^(\S{1,15}?)(?<!不)是(\S{2,})$"#, false),
-            (#"^(\S{0,14}?[\p{Han}\p{Katakana}])は(\S{2,})$"#, false),
+            (#"^(\S{0,14}?[\p{Han}\p{Katakana}ー])は(\S{2,})$"#, false),
         ]
         for (pattern, hasVerb) in patterns {
             guard
