@@ -7,6 +7,7 @@ struct DeckListView: View {
     @State private var selection: Deck?
     @State private var newDeck: NewDeckRequest?
     @State private var showingSettings = false
+    @State private var settingsRevision = 0
     @State private var searchText = ""
     @State private var deckToDelete: Deck?
 
@@ -25,6 +26,7 @@ struct DeckListView: View {
                         onSample: { openNewDeck(withSample: true) },
                         onSettings: { showingSettings = true }
                     )
+                    .id(settingsRevision)
                 } else {
                     List(selection: $selection) {
                         ForEach(filteredDecks) { deck in
@@ -61,7 +63,7 @@ struct DeckListView: View {
             .sheet(item: $newDeck) { request in
                 NewDeckView(startWithSample: request.startWithSample) { deck in selection = deck }
             }
-            .sheet(isPresented: $showingSettings) { SettingsView() }
+            .sheet(isPresented: $showingSettings, onDismiss: { settingsRevision += 1 }) { SettingsView() }
             .confirmationDialog(
                 "Delete “\(deckToDelete?.title ?? "")”?",
                 isPresented: Binding(get: { deckToDelete != nil }, set: { if !$0 { deckToDelete = nil } }),
