@@ -111,6 +111,8 @@ struct NewDeckView: View {
     }
 
     private func importPhotos(_ items: [PhotosPickerItem]) async {
+        isReadingPhotos = true
+        defer { isReadingPhotos = false }
         var images: [UIImage] = []
         for item in items {
             if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
