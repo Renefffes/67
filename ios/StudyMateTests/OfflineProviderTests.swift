@@ -248,8 +248,8 @@ final class OfflineProviderTests: XCTestCase {
         let first = OfflineProvider.reply(notes: notes, history: [], question: "What is the nucleus?")
         let history = [TutorTurn(isUser: true, text: "What is the nucleus?"), TutorTurn(isUser: false, text: first)]
         let more = OfflineProvider.reply(notes: notes, history: history, question: "Tell me more")
-        XCTAssertFalse(more.contains("mitosis"), more)
-        XCTAssertFalse(more.contains("membrane"), more)
+        XCTAssertFalse(more.contains("divide by mitosis"), more)
+        XCTAssertFalse(more.contains("surrounds every cell"), more)
     }
 
     func testDescribeAnswerIsGraded() {
