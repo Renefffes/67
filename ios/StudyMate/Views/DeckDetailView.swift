@@ -54,6 +54,7 @@ struct DeckDetailView: View {
                 }
                 .accessibilityIdentifier("tutorLink")
             }
+            .disabled(isRegenerating)
 
             Section("Notes") {
                 Text(deck.notes)
