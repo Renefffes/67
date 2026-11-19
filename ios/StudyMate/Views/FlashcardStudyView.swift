@@ -65,7 +65,7 @@ struct FlashcardStudyView: View {
             CardEditorView(title: "New card", front: "", back: "") { front, back in addCard(front: front, back: back) }
         }
         .sheet(isPresented: $showingCardList) {
-            CardListView(deck: deck, onAdd: addCard, onDelete: delete)
+            CardListView(deck: deck, onAdd: addCard, onDelete: delete, onEdit: { forgetHistory(of: $0) })
         }
         .confirmationDialog("Delete this card?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("Delete card", role: .destructive) { if let card = currentCard { delete(card) } }
@@ -350,6 +350,12 @@ struct FlashcardStudyView: View {
         }
     }
 
+    /// Undo can't restore a rating given to a card's old text.
+    private func forgetHistory(of card: Flashcard) {
+        knownThisSession -= history.filter { $0.card === card && $0.markedKnown }.count
+        history.removeAll { $0.card === card }
+    }
+
     private func undo() {
         guard let step = history.popLast() else { return }
         step.card.isKnown = step.wasKnown
@@ -379,8 +385,7 @@ struct FlashcardStudyView: View {
             queue.remove(at: position)
             if position < index { index -= 1 }
         }
-        knownThisSession -= history.filter { $0.card === card && $0.markedKnown }.count
-        history.removeAll { $0.card === card }
+        forgetHistory(of: card)
         deck.cards.removeAll { $0 === card }
         context.delete(card)
         showingAnswer = false
@@ -485,6 +490,7 @@ private struct CardListView: View {
     let deck: Deck
     var onAdd: (String, String) -> Void
     var onDelete: (Flashcard) -> Void
+    var onEdit: (Flashcard) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var editingCard: Flashcard?
     @State private var addingCard = false
@@ -529,7 +535,10 @@ private struct CardListView: View {
             }
             .sheet(item: $editingCard) { card in
                 CardEditorView(title: "Edit card", front: card.front, back: card.back) { front, back in
-                    if front != card.front || back != card.back { card.isKnown = false }
+                    if front != card.front || back != card.back {
+                        card.isKnown = false
+                        onEdit(card)
+                    }
                     card.front = front
                     card.back = back
                 }
