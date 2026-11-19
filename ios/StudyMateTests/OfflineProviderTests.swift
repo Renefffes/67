@@ -480,4 +480,8 @@ final class OfflineProviderTests: XCTestCase {
     func testCodeSpanKeepsDunderName() {
         XCTAssertEqual(OfflineProvider.sentences(in: "`__init__` sets up a new object"), ["__init__ sets up a new object"])
     }
+
+    func testFormulaAnswerKeepsCase() {
+        XCTAssertEqual(OfflineProvider.studySet(from: "Velocity = dx / dt", title: "").flashcards.first?.back, "dx / dt")
+    }
 }

@@ -26,7 +26,8 @@ struct OfflineProvider: StudyAIProvider {
                 let front = verb.map { "What \($0) \(term.lowercasingLeadingArticle)?" } ?? term
                 guard !cards.contains(where: { $0.front.lowercased() == front.lowercased() }) else { continue }
                 definitionCards.insert(cards.count)
-                cards.append(GeneratedCard(front: front, back: definition.capitalizedFirst))
+                let isFormula = definition.range(of: #"[=/^*+<>0-9]"#, options: .regularExpression) != nil
+                cards.append(GeneratedCard(front: front, back: isFormula ? definition : definition.capitalizedFirst))
                 sources.append(sentence)
             } else if let keyword = keyword(in: sentence) {
                 let blanked = sentence.replacingOccurrences(of: keyword, with: "_____", options: [], range: sentence.range(of: keyword))
