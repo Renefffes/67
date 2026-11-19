@@ -4,12 +4,12 @@ import SwiftUI
 struct DeckListView: View {
     @Query(sort: \Deck.createdAt, order: .reverse) private var decks: [Deck]
     @Environment(\.modelContext) private var context
-    @State private var path: [Deck] = []
+    @State private var selection: Deck?
     @State private var showingNewDeck = false
     @State private var showingSettings = false
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationSplitView {
             Group {
                 if decks.isEmpty {
                     ContentUnavailableView {
@@ -22,18 +22,19 @@ struct DeckListView: View {
                             .accessibilityIdentifier("emptyStateNewDeckButton")
                     }
                 } else {
-                    List {
+                    List(selection: $selection) {
                         ForEach(decks) { deck in
                             NavigationLink(value: deck) { DeckRow(deck: deck) }
                         }
                         .onDelete { offsets in
-                            offsets.map { decks[$0] }.forEach(context.delete)
+                            let removed = offsets.map { decks[$0] }
+                            if let selected = selection, removed.contains(selected) { selection = nil }
+                            removed.forEach(context.delete)
                         }
                     }
                 }
             }
             .navigationTitle("StudyMate")
-            .navigationDestination(for: Deck.self) { DeckDetailView(deck: $0) }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { showingSettings = true } label: { Image(systemName: "gearshape") }
@@ -47,9 +48,22 @@ struct DeckListView: View {
                 }
             }
             .sheet(isPresented: $showingNewDeck) {
-                NewDeckView { deck in path = [deck] }
+                NewDeckView { deck in selection = deck }
             }
             .sheet(isPresented: $showingSettings) { SettingsView() }
+        } detail: {
+            if let deck = selection {
+                NavigationStack { DeckDetailView(deck: deck) }
+                    .id(deck.persistentModelID)
+            } else {
+                ContentUnavailableView(
+                    decks.isEmpty ? "Add your notes to start" : "Pick a deck",
+                    systemImage: "rectangle.on.rectangle.angled",
+                    description: Text(decks.isEmpty
+                        ? "Tap + to paste, photograph or scan your notes."
+                        : "Choose a deck in the sidebar to study its flashcards, take the quiz or ask the tutor.")
+                )
+            }
         }
     }
 }

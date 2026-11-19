@@ -149,11 +149,11 @@ enum StudyAI {
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 if !reply.isEmpty { return reply }
             } catch {
-                let fallback = OfflineProvider.reply(notes: notes, history: history, question: question)
+                let fallback = OfflineProvider.reply(notes: notes, title: title, history: history, question: question)
                 return "\(fallback)\n\n(\(engine.displayName) didn't respond: \(error.localizedDescription).)"
             }
         }
-        return OfflineProvider.reply(notes: notes, history: history, question: question)
+        return OfflineProvider.reply(notes: notes, title: title, history: history, question: question)
     }
 
     static func sanitize(_ set: GeneratedStudySet) -> GeneratedStudySet {

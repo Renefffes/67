@@ -32,7 +32,7 @@ struct DeckDetailView: View {
 
             Section("Study") {
                 NavigationLink {
-                    FlashcardStudyView(deck: deck)
+                    FlashcardStudyView(deck: deck).readableWidth()
                 } label: {
                     Label("Flashcards", systemImage: "rectangle.on.rectangle.angled")
                         .badge(deck.cards.count)
@@ -40,7 +40,7 @@ struct DeckDetailView: View {
                 .accessibilityIdentifier("flashcardsLink")
 
                 NavigationLink {
-                    QuizView(deck: deck)
+                    QuizView(deck: deck).readableWidth()
                 } label: {
                     Label("Quiz", systemImage: "checklist")
                         .badge(deck.questions.count)
@@ -48,7 +48,7 @@ struct DeckDetailView: View {
                 .accessibilityIdentifier("quizLink")
 
                 NavigationLink {
-                    TutorChatView(deck: deck)
+                    TutorChatView(deck: deck).readableWidth()
                 } label: {
                     Label("AI tutor", systemImage: "bubble.left.and.text.bubble.right")
                 }
@@ -95,5 +95,12 @@ struct DeckDetailView: View {
         let outcome = await StudyAI.makeStudySet(notes: deck.notes, title: deck.title)
         deck.apply(outcome.set, engine: outcome.engine, note: outcome.note)
         isRegenerating = false
+    }
+}
+
+extension View {
+    /// Keeps study screens at a comfortable line length on iPad and in landscape.
+    func readableWidth() -> some View {
+        frame(maxWidth: 680).frame(maxWidth: .infinity)
     }
 }

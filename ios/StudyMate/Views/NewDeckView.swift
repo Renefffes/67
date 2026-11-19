@@ -111,6 +111,8 @@ struct NewDeckView: View {
     }
 
     private func importPhotos(_ items: [PhotosPickerItem]) async {
+        isReadingPhotos = true
+        defer { isReadingPhotos = false }
         var images: [UIImage] = []
         for item in items {
             if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
@@ -141,13 +143,20 @@ struct NewDeckView: View {
     private func generate() async {
         isGenerating = true
         errorMessage = nil
+        let source = notes
         let deckTitle = title.trimmed.isEmpty ? defaultTitle : title.trimmed
-        let outcome = await StudyAI.makeStudySet(notes: notes, title: deckTitle)
-        let deck = Deck(title: deckTitle, notes: notes.trimmed, engine: outcome.engine.displayName)
+        let outcome = await StudyAI.makeStudySet(notes: source, title: deckTitle)
+        let deck = Deck(title: deckTitle, notes: source.trimmed, engine: outcome.engine.displayName)
         context.insert(deck)
         deck.apply(outcome.set, engine: outcome.engine, note: outcome.note)
-        try? context.save()
         isGenerating = false
+        do {
+            try context.save()
+        } catch {
+            context.delete(deck)
+            errorMessage = "Couldn't save the deck: \(error.localizedDescription)"
+            return
+        }
         dismiss()
         onCreated(deck)
     }
