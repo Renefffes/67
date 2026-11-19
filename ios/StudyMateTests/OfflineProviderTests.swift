@@ -471,4 +471,9 @@ final class OfflineProviderTests: XCTestCase {
         let set = OfflineProvider.studySet(from: "Independence: 1776", title: "")
         XCTAssertEqual(set.flashcards.first?.back, "1776")
     }
+
+    func testNegatedChineseIsNotADefinition() {
+        XCTAssertNil(OfflineProvider.definition(in: "鲸鱼不是鱼类"))
+        XCTAssertEqual(OfflineProvider.definition(in: "水は液体です")?.term, "水")
+    }
 }
