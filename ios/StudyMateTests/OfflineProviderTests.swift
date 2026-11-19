@@ -207,4 +207,13 @@ final class OfflineProviderTests: XCTestCase {
         let reply = OfflineProvider.reply(notes: "Mitochondria\nRibosome\nNucleus", history: [], question: "Quiz me")
         XCTAssertTrue(reply.hasPrefix(OfflineProvider.quizPrefix), reply)
     }
+
+    func testExplainRequestDuringQuizIsNotGraded() {
+        let notes = "Photosynthesis is how plants make food from light. Osmosis is the movement of water across a membrane."
+        let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me")
+        let history = [TutorTurn(isUser: true, text: "Quiz me"), TutorTurn(isUser: false, text: question)]
+        let reply = OfflineProvider.reply(notes: notes, history: history, question: "Explain photosynthesis")
+        XCTAssertTrue(reply.contains("make food from light"), reply)
+        XCTAssertFalse(reply.hasPrefix("Not quite"), reply)
+    }
 }

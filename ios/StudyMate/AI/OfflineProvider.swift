@@ -277,8 +277,8 @@ struct OfflineProvider: StudyAIProvider {
 
     private static func isQuestion(_ text: String) -> Bool {
         let first = text.split(separator: " ").first.map(String.init) ?? ""
-        return ["what", "what's", "why", "how", "when", "where", "who", "which", "can", "could", "explain", "tell", "summarize", "summarise"].contains(first)
-            && text.hasSuffix("?")
+        return ["what", "what's", "why", "how", "when", "where", "who", "which", "can", "could", "explain", "tell", "summarize", "summarise", "describe"].contains(first)
+            && (text.hasSuffix("?") || ["explain", "summarize", "summarise", "describe"].contains(first))
     }
 
     private static func isQuizCommand(_ text: String) -> Bool {
