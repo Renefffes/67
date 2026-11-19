@@ -133,7 +133,7 @@ select { border: 1px solid var(--border); border-radius: 9px; padding: 10px; bac
 .flashcard h2 { font-size: 26px; margin: 22px 0; overflow-wrap: anywhere; }
 .flashcard > span:first-child { color: var(--text-muted); font-size: 12px; }
 .flashcard > small { display: flex; align-items: center; gap: 8px; }
-.flashcard.flipped { background: #eeedf9; }
+.flashcard.is-flipped { background: #eeedf9; }
 .flashcard-controls { display: flex; gap: 12px; margin-top: 16px; }
 .flashcard-controls > button { flex: 1; }
 .session-footer { text-align: center; color: var(--text-muted); font-size: 13px; margin: 24px 0; }
@@ -143,7 +143,7 @@ select { border: 1px solid var(--border); border-radius: 9px; padding: 10px; bac
 .answer-option { display: flex; align-items: center; text-align: left; gap: 12px; min-height: 64px; padding: 16px; border: 1px solid transparent; border-radius: 10px; background: var(--surface); font-size: 15px; overflow-wrap: anywhere; }
 .answer-option > span { color: var(--text-muted); font-size: 13px; }
 .answer-option.correct { border-color: #45955a; background: #e9f5ec; opacity: 1; }
-.answer-option.wrong { border-color: #c66c6c; background: #ffebeb; opacity: 1; }
+.answer-option.incorrect { border-color: #c66c6c; background: #ffebeb; opacity: 1; }
 .answer-option > svg { margin-left: auto; }
 .proposed-answer { background: #f2f2f7; padding: 16px; margin-top: 18px; border-radius: 9px; }
 .proposed-answer p { margin: 5px 0 0; }
