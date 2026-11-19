@@ -93,6 +93,60 @@ final class StudyMateUITests: XCTestCase {
         snapshot("0-library")
     }
 
+    func testFlashcardSwipeUndoEditDeleteAndResume() {
+        createSampleDeck()
+        app.buttons["flashcardsLink"].tap()
+        let card = app.buttons["flashcard"]
+        let counter = app.staticTexts["cardCounter"]
+        XCTAssertTrue(card.waitForExistence(timeout: 5))
+        XCTAssertEqual(card.label, "What is the cell?")
+        XCTAssertEqual(counter.label, "Card 1 of 8")
+
+        card.swipeRight()
+        XCTAssertTrue(app.navigationBars["Flashcards"].exists, "Swiping a card must not leave the session")
+        XCTAssertEqual(counter.label, "Card 2 of 8")
+        XCTAssertEqual(app.staticTexts["deckProgress"].label, "1 mastered · 7 still learning")
+
+        app.buttons["undoButton"].tap()
+        XCTAssertEqual(counter.label, "Card 1 of 8")
+        XCTAssertEqual(card.label, "What is the cell?")
+        XCTAssertEqual(app.staticTexts["deckProgress"].label, "0 mastered · 8 still learning")
+
+        card.swipeRight()
+        XCTAssertEqual(counter.label, "Card 2 of 8")
+        let secondFront = card.label
+
+        app.buttons["cardOptionsButton"].tap()
+        app.buttons["editCardButton"].tap()
+        let front = app.textViews["cardFrontField"].exists ? app.textViews["cardFrontField"] : app.textFields["cardFrontField"]
+        XCTAssertTrue(front.waitForExistence(timeout: 5))
+        front.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+        front.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: secondFront.count + 5))
+        front.typeText("Where is DNA stored?")
+        snapshot("8-edit-card")
+        app.buttons["saveCardButton"].tap()
+        XCTAssertTrue(card.waitForExistence(timeout: 5))
+        XCTAssertEqual(card.label, "Where is DNA stored?")
+
+        app.buttons["cardOptionsButton"].tap()
+        app.buttons["deleteCardButton"].tap()
+        let confirm = app.buttons.matching(identifier: "confirmDeleteCardButton").firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        confirm.tap()
+        XCTAssertEqual(counter.label, "Card 2 of 7")
+        XCTAssertNotEqual(card.label, "Where is DNA stored?")
+        card.swipeLeft()
+        XCTAssertEqual(counter.label, "Card 3 of 7")
+
+        app.navigationBars["Flashcards"].buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["flashcardsLink"].waitForExistence(timeout: 5))
+        app.buttons["flashcardsLink"].tap()
+        XCTAssertTrue(card.waitForExistence(timeout: 5))
+        XCTAssertEqual(counter.label, "Card 1 of 6", "Coming back skips mastered cards")
+        XCTAssertNotEqual(card.label, "What is the cell?")
+        snapshot("9-resume")
+    }
+
     private func createSampleDeck() {
         app.buttons["newDeckButton"].tap()
         app.buttons["sampleNotesButton"].tap()

@@ -63,6 +63,7 @@ final class Flashcard {
     var back: String
     var order: Int
     var isKnown: Bool = false
+    var lastReviewedAt: Date?
     var deck: Deck?
 
     init(front: String, back: String, order: Int) {
