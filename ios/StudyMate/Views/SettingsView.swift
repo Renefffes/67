@@ -200,7 +200,7 @@ extension StudyAI {
     }
 
     /// UI tests behave like an iPhone without Apple Intelligence so results don't depend on the test machine.
-    static var appleIntelligenceUsable: Bool { !AppEnvironment.isUITesting && appleIntelligenceAvailable }
+    static var appleIntelligenceUsable: Bool { !AppEnvironment.isUITesting && appleIntelligenceAvailable && !appleIntelligenceFailed }
 
     static var appleIntelligenceDisplayStatus: String {
         AppEnvironment.isUITesting ? "This device doesn't support Apple Intelligence" : appleIntelligenceStatus

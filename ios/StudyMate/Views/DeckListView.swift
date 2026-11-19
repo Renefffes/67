@@ -119,6 +119,7 @@ private struct FirstRunView: View {
             content
             ScrollView { content.padding(.vertical) }
         }
+        .task { await StudyAI.checkAppleIntelligence() }
     }
 
     private var content: some View {

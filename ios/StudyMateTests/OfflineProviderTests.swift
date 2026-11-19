@@ -511,4 +511,12 @@ final class OfflineProviderTests: XCTestCase {
         let set = OfflineProvider.studySet(from: "Osmosis is the movement of water across a membrane.\nDiffusion is the spreading of particles.\n- TODO buy groceries", title: "")
         XCTAssertFalse(set.quiz.flatMap(\.options).contains { $0.lowercased().contains("groceries") })
     }
+
+    func testFailedAppleIntelligenceIsNotNamedAsTheEngine() {
+        StudyAI.appleIntelligenceFailed = true
+        defer { StudyAI.appleIntelligenceFailed = false }
+        XCTAssertEqual(StudyAI.effectiveEngine(.automatic, hasGeminiKey: false), .offline)
+        XCTAssertEqual(StudyAI.effectiveEngine(.automatic, hasGeminiKey: true), .gemini)
+        XCTAssertEqual(StudyAI.effectiveEngine(.appleIntelligence, hasGeminiKey: true), .offline)
+    }
 }
