@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 // Ship the ONNX runtime locally rather than depending on a CDN offline.
 const runtime = 'node_modules/onnxruntime-web/dist';
 for (const name of await readdir(runtime)) {
-  if (name.startsWith('ort-wasm-simd-threaded') && /\.(wasm|mjs)$/.test(name)) await copyFile(`${runtime}/${name}`, `dist/assets/${name}`);
+  if (name.startsWith('ort-wasm-simd-threaded.jsep.') && /\.(wasm|mjs)$/.test(name)) await copyFile(`${runtime}/${name}`, `dist/assets/${name}`);
 }
 async function walk(dir) { const out=[];for(const f of await readdir(dir,{withFileTypes:true})){if(f.isDirectory())out.push(...await walk(`${dir}/${f.name}`));else out.push(`${dir}/${f.name}`);}return out; }
 const files=(await walk('dist')).filter(f=>!f.endsWith('sw.js')&&!f.endsWith('.map'));
