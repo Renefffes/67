@@ -4,6 +4,7 @@ import SwiftUI
 struct DeckDetailView: View {
     @Bindable var deck: Deck
     @State private var isRegenerating = false
+    @State private var confirmingRegenerate = false
 
     var body: some View {
         List {
@@ -53,6 +54,7 @@ struct DeckDetailView: View {
                 }
                 .accessibilityIdentifier("tutorLink")
             }
+            .disabled(isRegenerating)
 
             Section("Notes") {
                 Text(deck.notes)
@@ -65,7 +67,7 @@ struct DeckDetailView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button {
-                        Task { await regenerate() }
+                        confirmingRegenerate = true
                     } label: {
                         Label("Regenerate cards and quiz", systemImage: "arrow.clockwise")
                     }
@@ -74,6 +76,11 @@ struct DeckDetailView: View {
                 }
                 .disabled(isRegenerating)
             }
+        }
+        .confirmationDialog("Regenerate cards and quiz?", isPresented: $confirmingRegenerate, titleVisibility: .visible) {
+            Button("Regenerate", role: .destructive) { Task { await regenerate() } }
+        } message: {
+            Text("Your current flashcards, including any edits and progress, and the quiz will be replaced.")
         }
         .overlay {
             if isRegenerating {
