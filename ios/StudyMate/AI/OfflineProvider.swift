@@ -219,7 +219,7 @@ struct OfflineProvider: StudyAIProvider {
         let topic = index.label(for: previous ?? query)
 
         if wantsMore(lower) {
-            let onTopic = topic.map(index.sentences(containing:)) ?? []
+            let onTopic = index.sentences(containingAnyOf: query)
             let related = ranked + onTopic.filter { !ranked.contains($0) }
             let pool = related.isEmpty ? points : related
             let more = pool.filter { !alreadySaid.contains($0) }.prefix(3)
@@ -410,8 +410,10 @@ struct OfflineProvider: StudyAIProvider {
                 .map { sentences[$0.index] }
         }
 
-        func sentences(containing word: String) -> [String] {
-            sentences.indices.filter { words[$0].contains(word) }.map { sentences[$0] }
+        /// Sentences containing any query word that isn't common to most of the notes (like "cell").
+        func sentences(containingAnyOf query: Set<String>) -> [String] {
+            let distinctive = query.filter { word in words.filter { $0.contains(word) }.count * 2 <= max(sentences.count, 2) }
+            return sentences.indices.filter { !words[$0].isDisjoint(with: distinctive) }.map { sentences[$0] }
         }
 
         func label(for query: Set<String>) -> String? {
