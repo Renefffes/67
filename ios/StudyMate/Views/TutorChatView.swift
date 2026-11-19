@@ -59,11 +59,14 @@ struct TutorChatView: View {
                     .accessibilityIdentifier("chatClearButton")
             }
         }
-        .confirmationDialog("Clear this conversation?", isPresented: $confirmingClear, titleVisibility: .visible) {
-            Button("Clear conversation", role: .destructive) {
+        .alert("Clear this conversation?", isPresented: $confirmingClear) {
+            Button("Cancel", role: .cancel) {}
+            Button("Clear", role: .destructive) {
                 deck.messages.forEach(context.delete)
                 deck.messages.removeAll()
             }
+        } message: {
+            Text("All messages with the tutor for this deck will be deleted.")
         }
     }
 
