@@ -158,10 +158,7 @@ enum StudyAI {
                 if !reply.isEmpty { return reply }
             } catch {
                 let fallback = OfflineProvider.reply(notes: notes, title: title, history: history, question: question)
-                if selectedEngine == .automatic {
-                    if engine == .appleIntelligence { appleIntelligenceFailed = true }
-                    return fallback
-                }
+                if selectedEngine == .automatic { return fallback }
                 return "\(fallback)\n\n(\(engine.displayName) didn't respond: \(error.localizedDescription).)"
             }
         }
