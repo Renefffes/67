@@ -489,4 +489,8 @@ final class OfflineProviderTests: XCTestCase {
         let set = OfflineProvider.studySet(from: "Napoleon died in 1821", title: "")
         XCTAssertTrue(set.flashcards.first?.front.contains("_____") == true, "\(set.flashcards)")
     }
+
+    func testGroupedNumberIsNotADefinitionAnswer() {
+        XCTAssertNil(OfflineProvider.definition(in: "Population: 1,000,000"))
+    }
 }

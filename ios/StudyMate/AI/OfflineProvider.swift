@@ -125,7 +125,7 @@ struct OfflineProvider: StudyAIProvider {
             let term = group(1)
             guard term.split(separator: " ").count <= 6,
                   group(hasVerb ? 3 : 2).contains(where: \.isLetter)
-                    || group(hasVerb ? 3 : 2).range(of: #"^-?[0-9][0-9.,]*$"#, options: .regularExpression) != nil
+                    || group(hasVerb ? 3 : 2).range(of: #"^-?[0-9]+([.,][0-9]+)?$"#, options: .regularExpression) != nil
             else { continue }
             if hasVerb {
                 let verb = group(2).lowercased()
