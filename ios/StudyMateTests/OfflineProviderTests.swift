@@ -211,6 +211,23 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(OfflineProvider.grade(answer: "Titan", card: titan).hasPrefix("Correct!"))
         let iron = GeneratedCard(front: "Which element has the symbol Fe?", back: "Fe (iron)")
         XCTAssertTrue(OfflineProvider.grade(answer: "Fe", card: iron).hasPrefix("Correct!"))
+        let mass = GeneratedCard(front: "What does a balance measure?", back: "mass")
+        XCTAssertTrue(OfflineProvider.grade(answer: "masses", card: mass).hasPrefix("Correct!"))
+        let g = GeneratedCard(front: "What is g on Earth?", back: "9.81 m/s²")
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.81", card: g).hasPrefix("Correct!"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.82 m/s", card: g).hasPrefix("Not quite"))
+        let freezing = GeneratedCard(front: "Where do °C and °F meet?", back: "-40 degrees")
+        XCTAssertTrue(OfflineProvider.grade(answer: "40 degrees", card: freezing).hasPrefix("Not quite"))
+        let war = GeneratedCard(front: "When was WWII?", back: "1939-1945")
+        XCTAssertTrue(OfflineProvider.grade(answer: "1939 to 1945", card: war).hasPrefix("Correct!"))
+        let primes = GeneratedCard(front: "First three primes?", back: "2,3,5")
+        XCTAssertTrue(OfflineProvider.grade(answer: "2, 3, 5", card: primes).hasPrefix("Correct!"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "9,81", card: g).hasPrefix("Correct!"))
+        let dutch = GeneratedCard(front: "Wat is g op aarde?", back: "9,81 m/s²")
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.81", card: dutch).hasPrefix("Correct!"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "9 and 81", card: dutch).hasPrefix("Not quite"))
+        let mitosis = GeneratedCard(front: "What does mitosis do?", back: "divides cells")
+        XCTAssertTrue(OfflineProvider.grade(answer: "it divided the cell", card: mitosis).hasPrefix("Correct!"))
     }
 
     func testTutorGradesTheAskedCardWhenPromptsRepeat() {

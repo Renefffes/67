@@ -285,26 +285,45 @@ struct OfflineProvider: StudyAIProvider {
         let expected = answerWords(card.back)
         let given = answerWords(answer)
         let matched = expected.filter { word in given.contains { isWordForm($0, of: word) } }.count
+        let numbersMatch = numbers(in: decimalCommas(card.back)).isSubset(of: numbers(in: answer).union(numbers(in: decimalCommas(answer))))
         let correct = expected.isEmpty
             ? answer.lowercased().contains(card.back.lowercased())
-            : matched * 2 >= expected.count
+            : numbersMatch && matched * 2 >= expected.count
         if correct { return "Correct! The answer is: \(card.back)." }
-        if matched > 0 { return "Partly right. The full answer is: \(card.back)." }
+        if matched > 0, numbersMatch { return "Partly right. The full answer is: \(card.back)." }
         return "Not quite. The answer is: \(card.back)."
     }
 
     /// Keeps short tokens such as chemical symbols ("Fe") and numbers, unlike `contentWords`.
     private static func answerWords(_ text: String) -> Set<String> {
-        Set(words(in: text.lowercased()).filter { !stopWords.contains($0) }.map(normalized))
+        Set(words(in: text.lowercased()).filter { !stopWords.contains($0) })
     }
 
-    /// "divide" matches "divides" or "divided", but "titan" does not match "titanium".
+    /// Reads a lone comma inside a number as a decimal ("9,81" is 9.81) but leaves lists such as "2,3,5" alone.
+    private static func decimalCommas(_ text: String) -> String {
+        text.replacingOccurrences(of: #"(?<![0-9,])([0-9]+),([0-9]+)(?!,?[0-9])"#, with: "$1.$2", options: .regularExpression)
+    }
+
+    /// Whole numbers as written, so "9.82" is not "9.81" and "40" is not "-40"; the dash in "1939-1945" is a range, not a sign.
+    private static func numbers(in text: String) -> Set<String> {
+        Set(text.matches(of: /-?[0-9]+(?:\.[0-9]+)?/).map { match in
+            let afterDigit = match.range.lowerBound > text.startIndex && text[text.index(before: match.range.lowerBound)].isNumber
+            return String(afterDigit && match.output.hasPrefix("-") ? match.output.dropFirst() : match.output[...])
+        })
+    }
+
+    /// "divides" matches "divided" or "divide", and "masses" matches "mass", but "titan" does not match "titanium".
     private static func isWordForm(_ a: String, of b: String) -> Bool {
-        let (short, long) = a.count <= b.count ? (a, b) : (b, a)
-        guard short.count >= 3 || short == long, long.hasPrefix(short) else { return false }
-        let suffix = String(long.dropFirst(short.count))
-        if suffix == "d" { return short.hasSuffix("e") }
-        return ["", "s", "es", "ed", "ing", "ly"].contains(suffix)
+        !stems(a).isDisjoint(with: stems(b))
+    }
+
+    private static func stems(_ word: String) -> Set<String> {
+        var stems: Set<String> = [word]
+        for suffix in ["s", "es", "d", "ed", "ing", "ly"] where word.hasSuffix(suffix) {
+            let stem = String(word.dropLast(suffix.count))
+            if stem.count >= 3, suffix != "d" || stem.hasSuffix("e") { stems.insert(stem) }
+        }
+        return stems
     }
 
     // MARK: Tutor intents
