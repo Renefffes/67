@@ -368,5 +368,11 @@ final class StudyMateUITests: XCTestCase {
         XCTAssertEqual(app.textFields["deckTitleField"].placeholderValue, "Osmosis")
         app.buttons["Done"].tap()
         XCTAssertTrue(app.buttons["generateButton"].isEnabled)
+
+        let title = app.textFields["deckTitleField"]
+        title.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
     }
 }

@@ -18,7 +18,9 @@ struct NewDeckView: View {
     @State private var isGenerating = false
     @State private var errorMessage: String?
     @State private var photoMessage: String?
-    @FocusState private var notesFocused: Bool
+    @FocusState private var focusedField: Field?
+
+    private enum Field { case title, notes }
 
     private var wordCount: Int {
         let tokenizer = NLTokenizer(unit: .word)
@@ -37,12 +39,13 @@ struct NewDeckView: View {
                 Section("Title") {
                     TextField(notes.trimmed.isEmpty ? "e.g. Biology – The Cell" : defaultTitle, text: $title)
                         .accessibilityIdentifier("deckTitleField")
+                        .focused($focusedField, equals: .title)
                 }
                 Section {
                     TextEditor(text: $notes)
                         .frame(minHeight: 180)
                         .accessibilityIdentifier("notesEditor")
-                        .focused($notesFocused)
+                        .focused($focusedField, equals: .notes)
                         .overlay(alignment: .topLeading) {
                             if notes.isEmpty {
                                 Text("Paste or type your notes here…")
@@ -104,7 +107,7 @@ struct NewDeckView: View {
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") { notesFocused = false }
+                    Button("Done") { focusedField = nil }
                 }
             }
             .overlay {
@@ -152,7 +155,7 @@ struct NewDeckView: View {
 
     private func addText(from images: [UIImage]) async {
         guard !images.isEmpty else { return }
-        notesFocused = false
+        focusedField = nil
         photoMessage = nil
         isReadingPhotos = true
         defer { isReadingPhotos = false }
