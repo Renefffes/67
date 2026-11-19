@@ -242,19 +242,34 @@ struct OfflineProvider: StudyAIProvider {
     static func pendingQuizCard(history: [TutorTurn], cards: [GeneratedCard]) -> GeneratedCard? {
         guard let last = history.last, !last.isUser, let range = last.text.range(of: quizPrefix) else { return nil }
         let line = last.text[range.upperBound...].prefix { $0 != "\n" }
+        let asked = history.filter { !$0.isUser && $0.text.contains(quizPrefix) }.count
+        let askedCard = cards.isEmpty ? nil : cards[(asked - 1) % cards.count]
+        if let askedCard, askedCard.front == line { return askedCard }
         return cards.first { $0.front == line }
     }
 
     static func grade(answer: String, card: GeneratedCard) -> String {
-        let expected = contentWords(card.back.lowercased())
-        let given = contentWords(answer.lowercased())
-        let matched = expected.filter { word in given.contains { $0.hasPrefix(word) || word.hasPrefix($0) && $0.count >= 4 } }.count
+        let expected = answerWords(card.back)
+        let given = answerWords(answer)
+        let matched = expected.filter { word in given.contains { isWordForm($0, of: word) } }.count
         let correct = expected.isEmpty
             ? answer.lowercased().contains(card.back.lowercased())
             : matched * 2 >= expected.count
         if correct { return "Correct! The answer is: \(card.back)." }
         if matched > 0 { return "Partly right. The full answer is: \(card.back)." }
         return "Not quite. The answer is: \(card.back)."
+    }
+
+    /// Keeps short tokens such as chemical symbols ("Fe") and numbers, unlike `contentWords`.
+    private static func answerWords(_ text: String) -> Set<String> {
+        Set(words(in: text.lowercased()).filter { !stopWords.contains($0) }.map(normalized))
+    }
+
+    /// "divide" matches "divides" or "divided", but "titan" does not match "titanium".
+    private static func isWordForm(_ a: String, of b: String) -> Bool {
+        let (short, long) = a.count <= b.count ? (a, b) : (b, a)
+        guard short.count >= 3 || short == long, long.hasPrefix(short) else { return false }
+        return ["", "s", "es", "d", "ed", "ing", "ly"].contains(String(long.dropFirst(short.count)))
     }
 
     // MARK: Tutor intents

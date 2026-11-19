@@ -136,6 +136,24 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(OfflineProvider.grade(answer: "proteins", card: card).hasPrefix("Partly right"))
     }
 
+    func testTutorGradingIsStrictAboutDifferentWordsButAcceptsSymbols() {
+        let titan = GeneratedCard(front: "What is Saturn's largest moon?", back: "Titan")
+        XCTAssertTrue(OfflineProvider.grade(answer: "titanium", card: titan).hasPrefix("Not quite"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "Titan", card: titan).hasPrefix("Correct!"))
+        let iron = GeneratedCard(front: "Which element has the symbol Fe?", back: "Fe (iron)")
+        XCTAssertTrue(OfflineProvider.grade(answer: "Fe", card: iron).hasPrefix("Correct!"))
+    }
+
+    func testTutorGradesTheAskedCardWhenPromptsRepeat() {
+        let cards = [GeneratedCard(front: "The _____ splits cells.", back: "spindle"), GeneratedCard(front: "The _____ splits cells.", back: "cleavage")]
+        let history = [
+            TutorTurn(isUser: false, text: "\(OfflineProvider.quizPrefix)\(cards[0].front)"),
+            TutorTurn(isUser: true, text: "spindle"),
+            TutorTurn(isUser: false, text: "Correct!\n\n\(OfflineProvider.quizPrefix)\(cards[1].front)"),
+        ]
+        XCTAssertEqual(OfflineProvider.pendingQuizCard(history: history, cards: cards)?.back, "cleavage")
+    }
+
     func testTutorFollowUpUsesPreviousTopic() {
         let first = OfflineProvider.reply(notes: SampleNotes.text, history: [], question: "What does the nucleus do?")
         XCTAssertTrue(first.contains("stores DNA"), first)
