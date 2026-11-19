@@ -253,17 +253,23 @@ struct OfflineProvider: StudyAIProvider {
         let expected = answerWords(card.back)
         let given = answerWords(answer)
         let matched = expected.filter { word in given.contains { isWordForm($0, of: word) } }.count
+        let numbersMatch = numbers(in: card.back).isSubset(of: numbers(in: answer))
         let correct = expected.isEmpty
             ? answer.lowercased().contains(card.back.lowercased())
-            : matched * 2 >= expected.count
+            : numbersMatch && matched * 2 >= expected.count
         if correct { return "Correct! The answer is: \(card.back)." }
-        if matched > 0 { return "Partly right. The full answer is: \(card.back)." }
+        if matched > 0, numbersMatch { return "Partly right. The full answer is: \(card.back)." }
         return "Not quite. The answer is: \(card.back)."
     }
 
     /// Keeps short tokens such as chemical symbols ("Fe") and numbers, unlike `contentWords`.
     private static func answerWords(_ text: String) -> Set<String> {
-        Set(words(in: text.lowercased()).filter { !stopWords.contains($0) }.map(normalized))
+        Set(words(in: text.lowercased()).filter { !stopWords.contains($0) })
+    }
+
+    /// Whole numbers as written, so "9.82" is not "9.81" and "40" is not "-40".
+    private static func numbers(in text: String) -> Set<String> {
+        Set(text.matches(of: /-?[0-9]+(?:[.,][0-9]+)?/).map { $0.output.replacingOccurrences(of: ",", with: ".") })
     }
 
     /// "divide" matches "divides" or "divided", but "titan" does not match "titanium".

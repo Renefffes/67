@@ -142,6 +142,13 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(OfflineProvider.grade(answer: "Titan", card: titan).hasPrefix("Correct!"))
         let iron = GeneratedCard(front: "Which element has the symbol Fe?", back: "Fe (iron)")
         XCTAssertTrue(OfflineProvider.grade(answer: "Fe", card: iron).hasPrefix("Correct!"))
+        let mass = GeneratedCard(front: "What does a balance measure?", back: "mass")
+        XCTAssertTrue(OfflineProvider.grade(answer: "masses", card: mass).hasPrefix("Correct!"))
+        let g = GeneratedCard(front: "What is g on Earth?", back: "9.81 m/s²")
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.81", card: g).hasPrefix("Correct!"))
+        XCTAssertTrue(OfflineProvider.grade(answer: "9.82 m/s", card: g).hasPrefix("Not quite"))
+        let freezing = GeneratedCard(front: "Where do °C and °F meet?", back: "-40 degrees")
+        XCTAssertTrue(OfflineProvider.grade(answer: "40 degrees", card: freezing).hasPrefix("Not quite"))
     }
 
     func testTutorGradesTheAskedCardWhenPromptsRepeat() {
