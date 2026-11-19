@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowDownToLine, ArrowLeft, ArrowRight, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, CloudOff, Download, Flame, GraduationCap, Grid2X2, Layers, Leaf, MessageCircle, MoreHorizontal, Plus, RotateCcw, Search, Settings2, Sparkles, Timer, Trash2, Trophy, Upload, Volume2, X, Zap } from 'lucide-react';
-import { canPlayChoices, choicesFor, extractCards, initialData, palette, relevantNotes, sampleNotes, shuffle, uid, validateData, type Card, type Deck, type StudyData } from './study';
+import { canPlayChoices, choicesFor, extractCards, initialData, palette, relevantNotes, sampleNotes, shuffle, trueFalseAnswer, uid, validateData, type Card, type Deck, type StudyData } from './study';
 import { aiReady, connectAI, generate, loadAI, stopAI } from './ai';
 import { isPreview, prepareOffline } from './offline';
 type Page = 'library' | 'games' | 'tutor' | 'settings';
@@ -81,11 +81,11 @@ function DeckDetail({deck,setMode,update,back,remove}:{deck:Deck;setMode:(m:Mode
 function StudySession({deck,mode,onBack,record,updateDeck}:{deck:Deck;mode:Mode;onBack:()=>void;record:(correct:boolean,card?:Card)=>void;updateDeck:(d:Deck)=>void}) {
   const [queue,setQueue]=useState(()=>shuffle(deck.cards));const [index,setIndex]=useState(0);const [flipped,setFlipped]=useState(false);const [picked,setPicked]=useState<string|null>(null);const [score,setScore]=useState(0);const [done,setDone]=useState(false);const [seconds,setSeconds]=useState(60);const [started,setStarted]=useState(false);const current=queue[index%Math.max(queue.length,1)];
   const [options,setOptions]=useState(()=>current?choicesFor(current,deck.cards):[]);
-  const [shownAnswer,setShownAnswer]=useState(()=>current?(Math.random()<.5?current.back:shuffle(deck.cards.filter(c=>c.back!==current.back))[0]?.back??current.back):'');
+  const [shownAnswer,setShownAnswer]=useState(()=>current?trueFalseAnswer(current,deck.cards):'');
   useEffect(()=>{if(mode!=='sprint'||done||!started)return;const t=setInterval(()=>setSeconds(s=>{if(s<=1){setDone(true);return 0;}return s-1;}),1000);return()=>clearInterval(t);},[mode,done,started]);
-  function next() {if(mode!=='sprint'&&index+1>=queue.length){setDone(true);return;}const ni=(index+1)%queue.length;setIndex(i=>i+1);setFlipped(false);setPicked(null);setOptions(choicesFor(queue[ni],deck.cards));setShownAnswer(Math.random()<.5?queue[ni].back:shuffle(deck.cards.filter(c=>c.back!==queue[ni].back))[0]?.back??queue[ni].back);}
+  function next() {if(mode!=='sprint'&&index+1>=queue.length){setDone(true);return;}const ni=(index+1)%queue.length;setIndex(i=>i+1);setFlipped(false);setPicked(null);setOptions(choicesFor(queue[ni],deck.cards));setShownAnswer(trueFalseAnswer(queue[ni],deck.cards));}
   function choose(value:string,correct:boolean) {if(picked!==null||done)return;setPicked(value);if(correct)setScore(s=>s+1);record(correct,current);}
-  function restart(){const q=shuffle(deck.cards);setQueue(q);setIndex(0);setScore(0);setDone(false);setPicked(null);setFlipped(false);setSeconds(60);setStarted(false);setOptions(q[0]?choicesFor(q[0],deck.cards):[]);setShownAnswer(q[0]?.back??'');}
+  function restart(){const q=shuffle(deck.cards);setQueue(q);setIndex(0);setScore(0);setDone(false);setPicked(null);setFlipped(false);setSeconds(60);setStarted(false);setOptions(q[0]?choicesFor(q[0],deck.cards):[]);setShownAnswer(q[0]?trueFalseAnswer(q[0],deck.cards):'');}
   if(mode!=='cards'&&!canPlayChoices(deck.cards))return <><button className="back-link" onClick={onBack}><ArrowLeft/>Back to deck</button><PageTitle eyebrow="" title="Add more cards" subtitle="Choice-based learning and games need at least two cards with different answers."/></>;
   if(mode==='match')return <MatchGame deck={deck} back={onBack} record={record}/>;
   if(!current)return <><button className="back-link" onClick={onBack}><ArrowLeft/>Back to deck</button><PageTitle eyebrow="NOTHING HERE YET" title="Make room for a first card." subtitle="Add a card to this deck to start studying."/></>;
