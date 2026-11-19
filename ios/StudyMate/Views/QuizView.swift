@@ -125,6 +125,7 @@ struct QuizView: View {
             index += 1
         } else {
             finished = true
+            guard deck.sortedQuestions.map(\.persistentModelID) == questions.map(\.persistentModelID) else { return }
             deck.lastQuizScore = score
             deck.lastQuizTotal = questions.count
         }
