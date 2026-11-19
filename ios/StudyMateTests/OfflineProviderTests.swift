@@ -497,4 +497,9 @@ final class OfflineProviderTests: XCTestCase {
     func testReflowJoinsShortLowercasePrefix() {
         XCTAssertEqual(TextRecognizer.reflow(["Cells divide for re-", "production."]), "Cells divide for reproduction.")
     }
+
+    func testReflowJoinsLineStartingWithIonCharge() {
+        XCTAssertEqual(TextRecognizer.reflow(["In water, salt releases", "Cl- ions and sodium."]).contains("\n"), false)
+        XCTAssertEqual(TextRecognizer.reflow(["Table salt is made of", "lowercase cl- and na+ ions."]).contains("\n"), false)
+    }
 }
