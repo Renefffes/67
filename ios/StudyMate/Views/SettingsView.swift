@@ -30,8 +30,7 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
-                        saveDraftKey()
-                        dismiss()
+                        if saveDraftKey() { dismiss() }
                     }
                     .accessibilityIdentifier("settingsDoneButton")
                 }
@@ -124,7 +123,7 @@ struct SettingsView: View {
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .submitLabel(.done)
-                    .onSubmit(saveDraftKey)
+                    .onSubmit { saveDraftKey() }
                     .accessibilityLabel("Gemini API key")
                     .accessibilityIdentifier("geminiKeyField")
                 if !keyDraft.trimmed.isEmpty && !keyDraft.trimmed.hasPrefix("AIza") {
@@ -133,7 +132,7 @@ struct SettingsView: View {
                         .foregroundStyle(.orange)
                         .accessibilityIdentifier("geminiKeyFormatHint")
                 }
-                Button("Save key", action: saveDraftKey)
+                Button("Save key") { saveDraftKey() }
                     .disabled(keyDraft.trimmed.isEmpty)
                     .accessibilityIdentifier("saveGeminiKeyButton")
                 if case .failed(let message) = keyCheck {
@@ -157,17 +156,19 @@ struct SettingsView: View {
         }
     }
 
-    private func saveDraftKey() {
+    @discardableResult
+    private func saveDraftKey() -> Bool {
         let key = keyDraft.filter { !$0.isWhitespace }
-        guard !key.isEmpty else { return }
+        guard !key.isEmpty else { return true }
         Keychain.geminiAPIKey = key
         guard let stored = Keychain.geminiAPIKey, stored == key else {
             keyCheck = .failed("Couldn't save the key to this device's Keychain. Try again.")
-            return
+            return false
         }
         savedKey = stored
         keyDraft = ""
         keyCheck = .idle
+        return true
     }
 
     private func checkKey() async {
