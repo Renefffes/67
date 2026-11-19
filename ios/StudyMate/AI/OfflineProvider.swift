@@ -301,7 +301,7 @@ struct OfflineProvider: StudyAIProvider {
 
     /// Reads a lone comma inside a number as a decimal ("9,81" is 9.81) but leaves lists such as "2,3,5" alone.
     private static func decimalCommas(_ text: String) -> String {
-        text.replacingOccurrences(of: #"(?<![0-9,])([0-9]+),([0-9]+)(?!,?[0-9])"#, with: "$1.$2", options: .regularExpression)
+        text.replacingOccurrences(of: #"(?<![0-9,])(?<!,\s)([0-9]+),([0-9]+)(?![0-9]|\s*,\s*[0-9])"#, with: "$1.$2", options: .regularExpression)
     }
 
     /// Whole numbers as written, so "9.82" is not "9.81" and "40" is not "-40"; the dash in "1939-1945" is a range, not a sign.

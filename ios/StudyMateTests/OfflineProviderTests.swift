@@ -381,4 +381,9 @@ final class OfflineProviderTests: XCTestCase {
     func testEscapedBacktickDoesNotStartCode() {
         XCTAssertEqual(String(TutorText.attributed("\\` then 2*3*4").characters), "` then 2*3*4")
     }
+
+    func testSpacedNumberListIsNotADecimal() {
+        let card = GeneratedCard(front: "Which primes follow 1?", back: "2,3, 5")
+        XCTAssertTrue(OfflineProvider.grade(answer: "2, 3, 5", card: card).hasPrefix("Correct!"))
+    }
 }
