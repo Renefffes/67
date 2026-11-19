@@ -448,6 +448,7 @@ final class OfflineProviderTests: XCTestCase {
     func testOCRReflowKeepsSeparateDefinitions() {
         let text = TextRecognizer.reflow(["cells: basic unit of life", "mitochondria: powerhouse of the cell", "osmosis = water moving across a membrane"])
         XCTAssertEqual(text.components(separatedBy: "\n").count, 3)
+        XCTAssertEqual(TextRecognizer.reflow(["Photo-", "synthesis: plants convert light"]), "Photosynthesis: plants convert light")
     }
 
     func testSpanishTodoSentenceIsNotATask() {
