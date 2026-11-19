@@ -49,7 +49,7 @@ export default function App() {
   useEffect(()=> { if(storageError) return; try { localStorage.setItem(key,JSON.stringify(data)); } catch { setStorageError('Storage is full or unavailable. Export a backup now; recent changes are not saved.'); } },[data,storageError]);
   useEffect(()=> {
     prepareOffline(setOffline);
-    connectAI(setAIStatus,()=>setModelReady(true));
+    connectAI(setAIStatus,setModelReady);
     const update = () => setOnline(navigator.onLine);
     const prompt = (e:Event) => { e.preventDefault(); setInstall(e); };
     window.addEventListener('online',update); window.addEventListener('offline',update); window.addEventListener('beforeinstallprompt',prompt);
@@ -86,6 +86,7 @@ const gameModes = [{mode:'match' as Mode,title:'Perfect pairs',description:'Matc
 function GamePicker({decks,onStart}:{decks:Deck[];onStart:(id:string)=>void}) {const [id,setId]=useState(decks[0]?.id??'');const deck=decks.find(d=>d.id===id);const playable=deck&&canPlayChoices(deck.cards);return <div className="game-picker"><select aria-label="Choose game deck" value={id} onChange={e=>setId(e.target.value)}>{decks.map(d=><option key={d.id} value={d.id}>{d.title}</option>)}</select><button className="primary" disabled={!playable} onClick={()=>{if(playable)onStart(id);}}>Play <ArrowRight size={16}/></button>{!deck?<p>Create a deck first.</p>:!playable&&<p>Add at least two cards with different answers to play.</p>}</div>;}
 function NewDeck({onClose,onCreate,ready}:{onClose:()=>void;onCreate:(d:Deck,message?:string)=>void;ready:boolean}) {
   const [title,setTitle]=useState('');const [notes,setNotes]=useState('');const [subject,setSubject]=useState('My notes');const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [useAI,setUseAI]=useState(false);
+  useEffect(()=>{if(!ready)setUseAI(false);},[ready]);
   async function create() {
     if(!title.trim()||!notes.trim())return;
     let cards=extractCards(notes);if(!cards.length){setError('Add a few facts, ideally one “term: definition” per line.');return;}
