@@ -466,4 +466,9 @@ final class OfflineProviderTests: XCTestCase {
     func testReflowKeepsLowercaseDashEntriesApart() {
         XCTAssertEqual(TextRecognizer.reflow(["osmosis - movement of water", "diffusion - spreading of particles"]), "osmosis - movement of water\ndiffusion - spreading of particles")
     }
+
+    func testNumericAnswerMakesACard() {
+        let set = OfflineProvider.studySet(from: "Independence: 1776", title: "")
+        XCTAssertEqual(set.flashcards.first?.back, "1776")
+    }
 }
