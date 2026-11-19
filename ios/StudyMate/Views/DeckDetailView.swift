@@ -3,7 +3,7 @@ import SwiftUI
 
 struct DeckDetailView: View {
     @Bindable var deck: Deck
-    @State private var isRegenerating = false
+    private var isRegenerating: Bool { RegeneratingDecks.shared.ids.contains(deck.persistentModelID) }
     @State private var confirmingRegenerate = false
 
     var body: some View {
@@ -92,10 +92,11 @@ struct DeckDetailView: View {
     }
 
     private func regenerate() async {
-        isRegenerating = true
+        let id = deck.persistentModelID
+        RegeneratingDecks.shared.ids.insert(id)
+        defer { RegeneratingDecks.shared.ids.remove(id) }
         let outcome = await StudyAI.makeStudySet(notes: deck.notes, title: deck.title)
         deck.apply(outcome.set, engine: outcome.engine, note: outcome.note)
-        isRegenerating = false
     }
 }
 
@@ -104,4 +105,11 @@ extension View {
     func readableWidth() -> some View {
         frame(maxWidth: 680).frame(maxWidth: .infinity)
     }
+}
+
+/// Decks with a regeneration in flight, kept outside the view so switching decks on iPad doesn't reset it.
+@MainActor @Observable
+final class RegeneratingDecks {
+    static let shared = RegeneratingDecks()
+    var ids: Set<PersistentIdentifier> = []
 }

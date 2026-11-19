@@ -529,6 +529,7 @@ private struct CardListView: View {
             }
             .sheet(item: $editingCard) { card in
                 CardEditorView(title: "Edit card", front: card.front, back: card.back) { front, back in
+                    if front != card.front || back != card.back { card.isKnown = false }
                     card.front = front
                     card.back = back
                 }

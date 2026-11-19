@@ -381,4 +381,20 @@ final class OfflineProviderTests: XCTestCase {
     func testEscapedBacktickDoesNotStartCode() {
         XCTAssertEqual(String(TutorText.attributed("\\` then 2*3*4").characters), "` then 2*3*4")
     }
+
+    func testSpacedNumberListIsNotADecimal() {
+        let card = GeneratedCard(front: "Which primes follow 1?", back: "2,3, 5")
+        XCTAssertTrue(OfflineProvider.grade(answer: "2, 3, 5", card: card).hasPrefix("Correct!"))
+    }
+
+    func testUnicodeMinusIsANegativeNumber() {
+        let card = GeneratedCard(front: "Where do the scales meet?", back: "\u{2212}40 degrees")
+        XCTAssertTrue(OfflineProvider.grade(answer: "-40 degrees", card: card).hasPrefix("Correct!"))
+        XCTAssertFalse(OfflineProvider.grade(answer: "40 degrees", card: card).hasPrefix("Correct!"))
+    }
+
+    func testDecimalCommaAfterWordComma() {
+        let card = GeneratedCard(front: "What is g?", back: "On Earth, 9,81 m/s²")
+        XCTAssertTrue(OfflineProvider.grade(answer: "On Earth, 9.81 m/s²", card: card).hasPrefix("Correct!"))
+    }
 }
