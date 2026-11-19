@@ -163,7 +163,8 @@ struct OfflineProvider: StudyAIProvider {
         let name = title.trimmed.isEmpty ? "your notes" : "“\(title.trimmed)”"
         let alreadySaid = history.filter { !$0.isUser }.map(\.text).joined(separator: "\n")
 
-        if let pending = pendingQuizCard(history: history, cards: cards), !isQuestion(lower) && !isQuizCommand(lower) || isSkip(lower) {
+        if let pending = pendingQuizCard(history: history, cards: cards),
+           !isQuestion(lower, answering: pending) && !isQuizCommand(lower) || isSkip(lower) {
             if isStop(lower) { return "Quiz paused. Ask me anything about \(name), or say “quiz me” to keep going." }
             if isSkip(lower) || isNext(lower) {
                 return "The answer is: \(pending.back)\n\n" + quizQuestion(history: history, cards: cards)
@@ -277,6 +278,14 @@ struct OfflineProvider: StudyAIProvider {
     }
 
     // MARK: Tutor intents
+
+    /// An "Explain …" without a question mark is still an answer when it shares words with the expected answer.
+    private static func isQuestion(_ text: String, answering card: GeneratedCard) -> Bool {
+        guard isQuestion(text) else { return false }
+        guard !text.hasSuffix("?") else { return true }
+        let expected = answerWords(card.back)
+        return !answerWords(text).contains { word in expected.contains { isWordForm(word, of: $0) } }
+    }
 
     private static func isQuestion(_ text: String) -> Bool {
         let first = text.split(separator: " ").first.map(String.init) ?? ""
