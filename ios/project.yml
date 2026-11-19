@@ -1,0 +1,72 @@
+name: StudyMate
+options:
+  bundleIdPrefix: com.renefffes
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  StudyMate:
+    type: application
+    platform: iOS
+    sources:
+      - StudyMate
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.renefffes.studymate
+        PRODUCT_NAME: StudyMate
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: StudyMate
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.education
+        INFOPLIST_KEY_NSCameraUsageDescription: StudyMate uses the camera to scan your handwritten or printed notes.
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: StudyMate reads photos of your notes to turn them into flashcards.
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "1,2"
+  StudyMateTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - StudyMateTests
+    dependencies:
+      - target: StudyMate
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.renefffes.studymate.tests
+  StudyMateUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - StudyMateUITests
+    dependencies:
+      - target: StudyMate
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.renefffes.studymate.uitests
+        TEST_TARGET_NAME: StudyMate
+schemes:
+  StudyMate:
+    build:
+      targets:
+        StudyMate: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - StudyMateTests
+        - StudyMateUITests
+    archive:
+      config: Release
