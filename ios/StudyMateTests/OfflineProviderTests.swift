@@ -202,4 +202,9 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertEqual(String(text.characters), "Osmosis\n• Water moves\nFill in: The _____ stores DNA")
         XCTAssertTrue(text.runs.contains { $0.inlinePresentationIntent == .stronglyEmphasized })
     }
+
+    func testTutorQuizzesOneWordPerLineNotes() {
+        let reply = OfflineProvider.reply(notes: "Mitochondria\nRibosome\nNucleus", history: [], question: "Quiz me")
+        XCTAssertTrue(reply.hasPrefix(OfflineProvider.quizPrefix), reply)
+    }
 }

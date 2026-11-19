@@ -158,7 +158,7 @@ struct OfflineProvider: StudyAIProvider {
     static func reply(notes: String, title: String = "", history: [TutorTurn], question: String) -> String {
         let lower = question.lowercased().trimmed
         let all = sentences(in: notes)
-        guard !all.isEmpty else { return "Your notes are empty — add some notes first." }
+        guard !notes.trimmed.isEmpty else { return "Your notes are empty — add some notes first." }
         let cards = studySet(from: notes, title: title).flashcards
         let name = title.trimmed.isEmpty ? "your notes" : "“\(title.trimmed)”"
         let alreadySaid = history.filter { !$0.isUser }.map(\.text).joined(separator: "\n")
