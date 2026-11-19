@@ -1,0 +1,37 @@
+name: Publish StudyMate web
+# Opt in: repo owner must first enable Pages with GitHub Actions as its source.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: studymate-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: studymate-web/package-lock.json
+      - run: npm ci && npm test && npm run build
+        working-directory: studymate-web
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: studymate-web/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy static StudyMate app
+        id: deployment
+        uses: actions/deploy-pages@v4
