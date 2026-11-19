@@ -444,4 +444,15 @@ final class OfflineProviderTests: XCTestCase {
         let set = OfflineProvider.studySet(from: text, title: "")
         XCTAssertTrue(set.flashcards.contains(GeneratedCard(front: "What was Louis XVI?", back: "The king of France and he was executed in 1793")))
     }
+
+    func testOCRReflowKeepsSeparateDefinitions() {
+        let text = TextRecognizer.reflow(["cells: basic unit of life", "mitochondria: powerhouse of the cell", "osmosis = water moving across a membrane"])
+        XCTAssertEqual(text.components(separatedBy: "\n").count, 3)
+    }
+
+    func testSpanishTodoSentenceIsNotATask() {
+        let set = OfflineProvider.studySet(from: "Todo organismo necesita energía para vivir.\nTODO repasar capítulo 2", title: "")
+        XCTAssertTrue(set.flashcards.contains { $0.front.contains("organismo") || $0.back.contains("organismo") })
+        XCTAssertFalse(set.flashcards.contains { $0.front.contains("repasar") || $0.back.contains("repasar") })
+    }
 }

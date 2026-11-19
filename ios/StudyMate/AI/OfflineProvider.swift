@@ -186,7 +186,8 @@ struct OfflineProvider: StudyAIProvider {
 
     /// Reminders to self ("TODO ask prof…") aren't study material.
     private static func isTask(_ line: String) -> Bool {
-        line.range(of: #"^(todo|to do|to-do|fixme|reminder)\b"#, options: [.regularExpression, .caseInsensitive]) != nil
+        line.range(of: #"^(TODO|TO DO|FIXME)\b"#, options: .regularExpression) != nil
+            || line.range(of: #"^(todo|to do|to-do|fixme|reminder)\s*:"#, options: [.regularExpression, .caseInsensitive]) != nil
     }
 
     private static func isCJK(_ text: String) -> Bool {
