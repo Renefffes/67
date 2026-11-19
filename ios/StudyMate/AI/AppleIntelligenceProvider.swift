@@ -58,6 +58,10 @@ struct AppleIntelligenceProvider: StudyAIProvider {
         }
     }
 
+    static func ping() async throws {
+        _ = try await LanguageModelSession().respond(to: "Reply with OK.", options: GenerationOptions(maximumResponseTokens: 4))
+    }
+
     func makeStudySet(from notes: String, title: String) async throws -> GeneratedStudySet {
         let session = LanguageModelSession(instructions: StudyAI.studySetInstructions)
         let prompt = "Title: \(title)\n\nNotes:\n\(String(notes.prefix(Self.maxNotesLength)))"

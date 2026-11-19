@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 
 struct GeneratedCard: Codable, Equatable {
     var front: String
@@ -83,7 +84,22 @@ enum StudyAI {
     }
 
     /// Set when Automatic mode's Apple Intelligence attempt fails, so later requests go straight to the next engine.
-    nonisolated(unsafe) static var appleIntelligenceFailed = false
+    static var appleIntelligenceFailed: Bool {
+        get { AIHealth.shared.appleIntelligenceFailed }
+        set { AIHealth.shared.appleIntelligenceFailed = newValue }
+    }
+
+    /// Simulators and some devices report the on-device model as available but can't run it, so try a tiny request once.
+    static func checkAppleIntelligence() async {
+        guard !AppEnvironment.isUITesting, !AIHealth.shared.checked, appleIntelligenceAvailable,
+              [.automatic, .appleIntelligence].contains(storedEngine) else { return }
+        AIHealth.shared.checked = true
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, *) {
+            do { try await AppleIntelligenceProvider.ping() } catch { appleIntelligenceFailed = true }
+        }
+        #endif
+    }
 
     static var hasGeminiKey: Bool { !(Keychain.geminiAPIKey ?? "").isEmpty }
 
@@ -214,4 +230,12 @@ struct UnavailableProvider: StudyAIProvider {
 
 extension String {
     var trimmed: String { trimmingCharacters(in: .whitespacesAndNewlines) }
+}
+
+/// What this launch has learned about the on-device model; observable so engine labels update.
+@Observable
+final class AIHealth {
+    nonisolated(unsafe) static let shared = AIHealth()
+    var appleIntelligenceFailed = false
+    var checked = false
 }
