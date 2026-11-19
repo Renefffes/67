@@ -144,16 +144,12 @@ struct QuizView: View {
             let question = round[index]
             let correct = selected == question.answerIndex
             VStack(alignment: .leading, spacing: 10) {
-                Label(
-                    correct ? "Correct!" : "Not quite — the answer is “\(question.correctAnswer)”.",
-                    systemImage: correct ? "checkmark.circle.fill" : "xmark.circle.fill"
-                )
-                .font(.headline)
-                .foregroundStyle(correct ? .green : .red)
-                .accessibilityIdentifier("quizFeedback")
-                if !question.explanation.isEmpty {
-                    Text(question.explanation).font(.callout).foregroundStyle(.secondary)
+                // Long notes sentences scroll inside the bar instead of pushing Next off screen.
+                ViewThatFits(in: .vertical) {
+                    feedbackText(for: question, correct: correct)
+                    ScrollView { feedbackText(for: question, correct: correct) }
                 }
+                .frame(maxHeight: 280)
                 Button { next() } label: {
                     Text(index + 1 < round.count ? "Next question" : "See results").frame(maxWidth: .infinity)
                 }
@@ -165,6 +161,22 @@ struct QuizView: View {
             .padding()
             .background(.bar)
         }
+    }
+
+    private func feedbackText(for question: QuizItem, correct: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(
+                correct ? "Correct!" : "Not quite — the answer is “\(question.correctAnswer)”.",
+                systemImage: correct ? "checkmark.circle.fill" : "xmark.circle.fill"
+            )
+            .font(.headline)
+            .foregroundStyle(correct ? .green : .red)
+            .accessibilityIdentifier("quizFeedback")
+            if !question.explanation.isEmpty {
+                Text(question.explanation).font(.callout).foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var results: some View {
