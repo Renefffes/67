@@ -242,4 +242,13 @@ final class OfflineProviderTests: XCTestCase {
         let reply = OfflineProvider.reply(notes: notes, history: history, question: "Why is the sky blue?")
         XCTAssertFalse(reply.contains("stores DNA"), reply)
     }
+
+    func testTellMeMoreStaysOnTopic() {
+        let notes = "The nucleus is the control center of the cell. The nucleus stores DNA. A cell membrane surrounds every cell. Cells divide by mitosis."
+        let first = OfflineProvider.reply(notes: notes, history: [], question: "What is the nucleus?")
+        let history = [TutorTurn(isUser: true, text: "What is the nucleus?"), TutorTurn(isUser: false, text: first)]
+        let more = OfflineProvider.reply(notes: notes, history: history, question: "Tell me more")
+        XCTAssertFalse(more.contains("mitosis"), more)
+        XCTAssertFalse(more.contains("membrane"), more)
+    }
 }
