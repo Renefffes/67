@@ -216,4 +216,9 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertTrue(reply.contains("make food from light"), reply)
         XCTAssertFalse(reply.hasPrefix("Not quite"), reply)
     }
+
+    func testTutorTextKeepsMultiplicationSigns() {
+        XCTAssertEqual(String(TutorText.attributed("2*3*4 = 24").characters), "2*3*4 = 24")
+        XCTAssertEqual(String(TutorText.attributed("a **bold** word").characters), "a bold word")
+    }
 }

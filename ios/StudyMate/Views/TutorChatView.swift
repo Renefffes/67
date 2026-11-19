@@ -163,7 +163,9 @@ enum TutorText {
                 line = indent + "• " + trimmed.dropFirst(marker.count)
             }
             var piece = (try? AttributedString(
-                markdown: line.replacingOccurrences(of: "_____", with: "\\_\\_\\_\\_\\_"),
+                markdown: line
+                    .replacingOccurrences(of: "_____", with: "\\_\\_\\_\\_\\_")
+                    .replacingOccurrences(of: #"(?<=[A-Za-z0-9])\*(?=[A-Za-z0-9])"#, with: #"\\*"#, options: .regularExpression),
                 options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
             )) ?? AttributedString(line)
             if isHeading { piece.font = .headline }
