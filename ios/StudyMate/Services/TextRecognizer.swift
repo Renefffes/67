@@ -23,12 +23,31 @@ enum TextRecognizer {
                 do {
                     try VNImageRequestHandler(cgImage: image, orientation: orientation).perform([request])
                     let lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
-                    continuation.resume(returning: lines.joined(separator: "\n"))
+                    continuation.resume(returning: reflow(lines))
                 } catch {
                     continuation.resume(throwing: error)
                 }
             }
         }
+    }
+
+    /// Joins lines the page wrapped mid-sentence ("…when angry" + "citizens stormed…"),
+    /// keeping real line breaks such as headings and bullet points.
+    static func reflow(_ lines: [String]) -> String {
+        var result: [String] = []
+        for raw in lines {
+            let line = raw.trimmingCharacters(in: .whitespaces)
+            guard !line.isEmpty else { continue }
+            if let previous = result.last, let last = previous.last, let first = line.first,
+               first.isLowercase, !".!?:;。！？".contains(last) {
+                result[result.count - 1] = last == "-" && previous.dropLast().last?.isLetter == true
+                    ? String(previous.dropLast()) + line
+                    : previous + " " + line
+            } else {
+                result.append(line)
+            }
+        }
+        return result.joined(separator: "\n")
     }
 }
 
@@ -46,4 +65,5 @@ private extension CGImagePropertyOrientation {
         @unknown default: self = .up
         }
     }
+
 }

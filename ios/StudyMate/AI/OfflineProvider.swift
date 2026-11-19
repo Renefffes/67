@@ -90,14 +90,16 @@ struct OfflineProvider: StudyAIProvider {
     static func sentences(in text: String) -> [String] {
         var result: [String] = []
         for rawLine in text.components(separatedBy: .newlines) {
-            let line = stripBullet(rawLine.trimmed)
-            guard !line.isEmpty else { continue }
+            let line = stripBullet(stripMarkup(rawLine.trimmed))
+            guard !line.isEmpty, !isTask(line) else { continue }
             let tokenizer = NLTokenizer(unit: .sentence)
             tokenizer.string = line
             tokenizer.enumerateTokens(in: line.startIndex..<line.endIndex) { range, _ in
                 var sentence = String(line[range]).trimmed
-                while let last = sentence.last, ".!?;".contains(last) { sentence.removeLast() }
-                if sentence.split(separator: " ").count >= 2 { result.append(sentence) }
+                while let last = sentence.last, ".!?;。！？；".contains(last) { sentence.removeLast() }
+                if sentence.split(separator: " ").count >= 2 || (isCJK(sentence) && sentence.count >= 4) {
+                    result.append(sentence)
+                }
                 return true
             }
         }
@@ -109,6 +111,8 @@ struct OfflineProvider: StudyAIProvider {
             (#"^(.{2,60}?)\s+(is|are|was|were|means|refers to)\s+(.{3,})$"#, true),
             (#"^([^:]{2,60}):\s*(.{3,})$"#, false),
             (#"^(.{2,60}?)\s+[-–—]\s+(.{3,})$"#, false),
+            (#"^(.{2,60}?)\s*(?:=>|->|→|=)\s*(.{3,})$"#, false),
+            (#"^(\S{1,15}?)(?:是|は)(\S{2,})$"#, false),
         ]
         for (pattern, hasVerb) in patterns {
             guard
@@ -117,7 +121,9 @@ struct OfflineProvider: StudyAIProvider {
             else { continue }
             let group = { (i: Int) in Range(match.range(at: i), in: sentence).map { String(sentence[$0]).trimmed } ?? "" }
             let term = group(1)
-            guard term.split(separator: " ").count <= 6 else { continue }
+            guard term.split(separator: " ").count <= 6,
+                  group(hasVerb ? 3 : 2).contains(where: \.isLetter)
+            else { continue }
             if hasVerb {
                 let verb = group(2).lowercased()
                 let question = ["are", "were"].contains(verb) ? verb : (verb == "was" ? "was" : "is")
@@ -131,7 +137,7 @@ struct OfflineProvider: StudyAIProvider {
 
     static func keyword(in sentence: String) -> String? {
         let words = words(in: sentence).filter { $0.count >= 4 && !stopWords.contains($0.lowercased()) }
-        guard sentence.split(separator: " ").count >= 4 else { return nil }
+        guard sentence.split(separator: " ").filter({ $0.contains(where: \.isLetter) }).count >= 4 else { return nil }
         return words.max { score($0) < score($1) }
     }
 
@@ -170,6 +176,21 @@ struct OfflineProvider: StudyAIProvider {
     private static func wordShape(_ word: String) -> Int {
         guard let first = word.first else { return 0 }
         return first.isNumber ? 1 : first.isUppercase ? 2 : 3
+    }
+
+    private static func stripMarkup(_ line: String) -> String {
+        line.replacingOccurrences(of: #"^#{1,6}\s+"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"\*\*|__|`"#, with: "", options: .regularExpression)
+            .trimmed
+    }
+
+    /// Reminders to self ("TODO ask prof…") aren't study material.
+    private static func isTask(_ line: String) -> Bool {
+        line.range(of: #"^(todo|to do|to-do|fixme|reminder)\b"#, options: [.regularExpression, .caseInsensitive]) != nil
+    }
+
+    private static func isCJK(_ text: String) -> Bool {
+        text.unicodeScalars.contains { (0x3040...0x30FF).contains($0.value) || (0x4E00...0x9FFF).contains($0.value) || (0xAC00...0xD7AF).contains($0.value) }
     }
 
     static func stableHash(_ text: String) -> Int {

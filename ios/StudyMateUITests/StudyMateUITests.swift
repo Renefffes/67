@@ -355,4 +355,18 @@ final class StudyMateUITests: XCTestCase {
         attachment.lifetime = .keepAlways
         add(attachment)
     }
+
+    func testShortNotesShowHintAndSuggestedTitle() {
+        app.buttons["emptyStateNewDeckButton"].tap()
+        let notes = app.textViews["notesEditor"]
+        XCTAssertTrue(notes.waitForExistence(timeout: 5))
+        notes.tap()
+        notes.typeText("Osmosis")
+        let count = app.staticTexts["wordCountLabel"]
+        XCTAssertTrue(count.waitForExistence(timeout: 5))
+        XCTAssertTrue(count.label.hasPrefix("1 word ·"), count.label)
+        XCTAssertEqual(app.textFields["deckTitleField"].placeholderValue, "Osmosis")
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.buttons["generateButton"].isEnabled)
+    }
 }

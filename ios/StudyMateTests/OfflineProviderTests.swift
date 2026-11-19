@@ -397,4 +397,51 @@ final class OfflineProviderTests: XCTestCase {
         let card = GeneratedCard(front: "What is g?", back: "On Earth, 9,81 m/s²")
         XCTAssertTrue(OfflineProvider.grade(answer: "On Earth, 9.81 m/s²", card: card).hasPrefix("Correct!"))
     }
+
+    func testMessyNotesSkipHeadingsTodosAndMarkup() {
+        let notes = """
+        BIO lecture 3 - 12/11 !!!
+        - cells = basic unit of life
+        - mitochondria -> powerhouse, makes ATP (energy)
+        TODO ask prof abt exam??
+        **Photosynthesis**: light + CO2 + H2O → glucose + O2
+        """
+        let set = OfflineProvider.studySet(from: notes, title: "")
+        let fronts = set.flashcards.map(\.front)
+        XCTAssertFalse(fronts.contains { $0.contains("TODO") || $0.contains("*") || $0.contains("BIO lecture") })
+        XCTAssertFalse(set.flashcards.contains { $0.back == "TODO" || $0.back == "12/11" })
+        XCTAssertTrue(set.flashcards.contains(GeneratedCard(front: "cells", back: "Basic unit of life")))
+        XCTAssertTrue(set.flashcards.contains(GeneratedCard(front: "mitochondria", back: "Powerhouse, makes ATP (energy)")))
+        XCTAssertTrue(fronts.contains("Photosynthesis"))
+    }
+
+    func testChineseAndJapaneseNotesMakeCards() {
+        let chinese = OfflineProvider.studySet(from: "细胞是生命的基本单位。线粒体是细胞的能量工厂。细胞核储存DNA。", title: "生物")
+        XCTAssertTrue(chinese.flashcards.contains(GeneratedCard(front: "细胞", back: "生命的基本单位")))
+        XCTAssertGreaterThanOrEqual(chinese.flashcards.count, 2)
+        XCTAssertFalse(chinese.quiz.isEmpty)
+
+        let japanese = OfflineProvider.studySet(from: "細胞は生命の基本単位です。ミトコンドリアはエネルギーを作ります。", title: "")
+        XCTAssertTrue(japanese.flashcards.contains(GeneratedCard(front: "細胞", back: "生命の基本単位です")))
+    }
+
+    func testOCRReflowJoinsWrappedLines() {
+        let text = TextRecognizer.reflow([
+            "History - French Revolution",
+            "The French Revolution began in 1789 when angry",
+            "citizens stormed the Bastille prison in Paris.",
+            "Louis XVI was the king of France and he was",
+            "executed in 1793.",
+            "Photo-",
+            "synthesis needs light.",
+        ])
+        XCTAssertEqual(text, """
+        History - French Revolution
+        The French Revolution began in 1789 when angry citizens stormed the Bastille prison in Paris.
+        Louis XVI was the king of France and he was executed in 1793.
+        Photosynthesis needs light.
+        """)
+        let set = OfflineProvider.studySet(from: text, title: "")
+        XCTAssertTrue(set.flashcards.contains(GeneratedCard(front: "What was Louis XVI?", back: "The king of France and he was executed in 1793")))
+    }
 }
