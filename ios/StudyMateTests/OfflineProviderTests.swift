@@ -12,6 +12,51 @@ final class OfflineProviderTests: XCTestCase {
         XCTAssertEqual(set.flashcards.first?.front, "What is the cell?")
     }
 
+    func testNumbersAtLineStartAreKept() {
+        XCTAssertEqual(OfflineProvider.sentences(in: "3.14 is the value of pi"), ["3.14 is the value of pi"])
+        XCTAssertEqual(OfflineProvider.sentences(in: "-40 degrees is where both scales meet"), ["-40 degrees is where both scales meet"])
+        XCTAssertEqual(OfflineProvider.sentences(in: "1. Mitosis splits cells\n- Meiosis makes gametes"), ["Mitosis splits cells", "Meiosis makes gametes"])
+    }
+
+    func testSummaryCardIsNotTurnedIntoQuiz() {
+        let set = OfflineProvider.studySet(from: "Cells", title: "Bio")
+        XCTAssertTrue(set.quiz.isEmpty)
+    }
+
+    func testTutorQuizHidesAnswerThenChecksIt() {
+        let notes = "Osmosis is the movement of water across a membrane."
+        let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me on this")
+        XCTAssertTrue(question.hasPrefix("Quick question: What is Osmosis?"), question)
+        XCTAssertFalse(question.contains("movement of water"))
+        let history = [TutorTurn(isUser: true, text: "Quiz me on this"), TutorTurn(isUser: false, text: question)]
+        let right = OfflineProvider.reply(notes: notes, history: history, question: "water moving across a membrane")
+        XCTAssertTrue(right.hasPrefix("Nice, that's right!"), right)
+        let wrong = OfflineProvider.reply(notes: notes, history: history, question: "cell division")
+        XCTAssertTrue(wrong.hasPrefix("Not quite."), wrong)
+    }
+
+    func testTutorGradesAnswerThatMentionsQuiz() {
+        let notes = "A quiz is a short test of knowledge."
+        let question = OfflineProvider.reply(notes: notes, history: [], question: "Quiz me")
+        let history = [TutorTurn(isUser: true, text: "Quiz me"), TutorTurn(isUser: false, text: question)]
+        let answer = OfflineProvider.reply(notes: notes, history: history, question: "a short test of knowledge, like a quiz")
+        XCTAssertTrue(answer.hasPrefix("Nice, that's right!"), answer)
+        let next = OfflineProvider.reply(notes: notes, history: history, question: "quiz me again")
+        XCTAssertTrue(next.hasPrefix(OfflineProvider.quizPrefix), next)
+    }
+
+    func testTutorGradesTheCardItAsked() {
+        let notes = "Mitochondria produce energy. Ribosomes produce proteins. Chloroplasts capture sunlight."
+        let set = OfflineProvider.studySet(from: notes, title: "")
+        var history: [TutorTurn] = []
+        for _ in 0..<2 {
+            history.append(TutorTurn(isUser: true, text: "Quiz me"))
+            history.append(TutorTurn(isUser: false, text: OfflineProvider.reply(notes: notes, history: history, question: "Quiz me")))
+        }
+        let answer = OfflineProvider.reply(notes: notes, history: history, question: set.flashcards[1 % set.flashcards.count].back)
+        XCTAssertTrue(answer.hasPrefix("Nice, that's right!"), answer)
+    }
+
     func testColonNotesBecomeTermCards() {
         let set = OfflineProvider.studySet(from: "- Mitosis: cell division producing two identical cells", title: "")
         XCTAssertEqual(set.flashcards.first?.front, "Mitosis")

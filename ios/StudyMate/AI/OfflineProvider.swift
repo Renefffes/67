@@ -19,6 +19,7 @@ struct OfflineProvider: StudyAIProvider {
     static func studySet(from notes: String, title: String) -> GeneratedStudySet {
         var cards: [GeneratedCard] = []
         var definitionCards: Set<Int> = []
+        var clozeCards: Set<Int> = []
         var sources: [String] = []
         for sentence in sentences(in: notes) where cards.count < maxCards {
             if let (term, definition, verb) = definition(in: sentence) {
@@ -29,6 +30,7 @@ struct OfflineProvider: StudyAIProvider {
                 sources.append(sentence)
             } else if let keyword = keyword(in: sentence) {
                 let blanked = sentence.replacingOccurrences(of: keyword, with: "_____", options: [], range: sentence.range(of: keyword))
+                clozeCards.insert(cards.count)
                 cards.append(GeneratedCard(front: blanked, back: keyword))
                 sources.append(sentence)
             }
@@ -42,11 +44,12 @@ struct OfflineProvider: StudyAIProvider {
         let fallbackPool = keywords(in: notes, limit: 30)
         var quiz: [GeneratedQuestion] = []
         for (index, card) in cards.prefix(maxQuestions).enumerated() {
-            let isCloze = !definitionCards.contains(index)
+            let isCloze = clozeCards.contains(index)
+            guard isCloze || definitionCards.contains(index) else { continue }
             let seed = stableHash(card.front)
             let others = rotated(
                 cards.enumerated()
-                    .filter { $0.offset != index && definitionCards.contains($0.offset) != isCloze }
+                    .filter { $0.offset != index && clozeCards.contains($0.offset) == isCloze && (isCloze || definitionCards.contains($0.offset)) }
                     .map(\.element.back),
                 by: seed
             )
@@ -155,7 +158,7 @@ struct OfflineProvider: StudyAIProvider {
     }
 
     private static func stripBullet(_ line: String) -> String {
-        line.replacingOccurrences(of: #"^([-•*·]|\d+[.)])\s*"#, with: "", options: .regularExpression)
+        line.replacingOccurrences(of: #"^([•*·]\s*|[-–]\s+|\d+[.)]\s+)"#, with: "", options: .regularExpression)
     }
 
     private static func rotated(_ items: [String], by seed: Int) -> [String] {
@@ -175,15 +178,31 @@ struct OfflineProvider: StudyAIProvider {
 
     // MARK: Tutor
 
+    static let quizPrefix = "Quick question:"
+
     static func reply(notes: String, history: [TutorTurn], question: String) -> String {
         let lower = question.lowercased()
         let all = sentences(in: notes)
         let set = studySet(from: notes, title: "")
 
-        if lower.contains("quiz") || lower.contains("test me") {
-            let asked = history.filter { !$0.isUser && $0.text.hasPrefix("Quick question") }.count
+        let asked = history.filter { !$0.isUser && $0.text.hasPrefix(quizPrefix) }.count
+        let awaitingAnswer = history.last.map { !$0.isUser && $0.text.hasPrefix(quizPrefix) } ?? false
+        let trimmed = lower.trimmed
+        let isQuizCommand = ["quiz me", "test me", "another", "next"].contains { trimmed.hasPrefix($0) }
+
+        if isQuizCommand || (!awaitingAnswer && (lower.contains("quiz") || lower.contains("test me"))) {
             let card = set.flashcards[asked % set.flashcards.count]
-            return "Quick question: \(card.front)\n\nThink about it, then tap the card below to check.\nAnswer: \(card.back)"
+            return "\(quizPrefix) \(card.front)\n\nType your answer and I'll check it."
+        }
+
+        if awaitingAnswer {
+            let card = set.flashcards[(asked - 1) % set.flashcards.count]
+            let expected = Set(words(in: card.back.lowercased()).filter { !stopWords.contains($0) })
+            let given = Set(words(in: lower))
+            let correct = expected.isEmpty
+                ? lower.contains(card.back.lowercased())
+                : Double(expected.intersection(given).count) / Double(expected.count) >= 0.5
+            return (correct ? "Nice, that's right!" : "Not quite.") + " The answer is: \(card.back).\n\nSay \"quiz me\" for another one."
         }
 
         let queryWords = Set(words(in: lower).filter { $0.count >= 3 && !stopWords.contains($0) })
