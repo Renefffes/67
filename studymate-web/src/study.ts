@@ -32,6 +32,11 @@ export function shuffle<T>(items: T[]): T[] { const a = [...items]; for (let i =
 export function choicesFor(card: Card, cards: Card[]): string[] { return shuffle([card.back, ...shuffle([...new Set(cards.filter(c => c.back !== card.back).map(c => c.back))]).slice(0, 3)]); }
 export function canPlayChoices(cards: Card[]): boolean { return new Set(cards.map(c => c.back)).size >= 2; }
 export function trueFalseAnswer(card: Card, cards: Card[], random = Math.random): string { return random() < .5 ? card.back : shuffle(cards.filter(c => c.back !== card.back))[0]?.back ?? card.back; }
+// Keep both sides of a source fact: AI may ask for its term or its definition.
+export function sourceFact(card: Card): string {
+  const term = card.front.match(/^What (?:is|are) (.+)\?$/)?.[1];
+  return term ? `${term}: ${card.back}` : card.back;
+}
 export function relevantNotes(question: string, deck: Deck): string {
   const words = question.toLowerCase().match(/[\p{L}\p{N}]{3,}/gu)?.filter(w => !['what','does','that','this','with','have','explain','about','could','please','which','tell','from','the','and','are','how','why'].includes(w)) ?? [];
   const ranked = deck.cards.map(c => ({c, score: words.reduce((n, w) => n + (`${c.front} ${c.back}`.toLowerCase().includes(w) ? 1 : 0), 0)})).filter(r => r.score > 0).sort((a,b) => b.score-a.score).slice(0, 3);
