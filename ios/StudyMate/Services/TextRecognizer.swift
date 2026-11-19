@@ -40,7 +40,7 @@ enum TextRecognizer {
             guard !line.isEmpty else { continue }
             let previous = result.last ?? ""
             let fragment = previous.dropLast().reversed().prefix { $0.isLetter }
-            let hyphenated = previous.hasSuffix("-") && fragment.count >= 2 && fragment.allSatisfy(\.isLowercase)
+            let hyphenated = previous.hasSuffix("-") && (fragment.count >= 3 || fragment.count == 2 && fragment.allSatisfy(\.isLowercase))
             if let last = previous.last, let first = line.first, first.isLowercase,
                !".!?:;。！？".contains(last), !startsDefinition(line) || (hyphenated && !startsDefinition(previous)) {
                 result[result.count - 1] = hyphenated ? String(previous.dropLast()) + line : previous + " " + line
