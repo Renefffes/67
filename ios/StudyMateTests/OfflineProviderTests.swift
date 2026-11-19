@@ -274,4 +274,12 @@ final class OfflineProviderTests: XCTestCase {
         let reply = OfflineProvider.reply(notes: "Mitochondria\nRibosome", history: [], question: "Summarize")
         XCTAssertTrue(reply.contains("Mitochondria") && reply.contains("Ribosome"), reply)
     }
+
+    func testWhyDoYouSaySoIsAFollowUp() {
+        let notes = "The nucleus stores DNA. Mitochondria produce energy."
+        let first = OfflineProvider.reply(notes: notes, history: [], question: "What does the nucleus do?")
+        let history = [TutorTurn(isUser: true, text: "What does the nucleus do?"), TutorTurn(isUser: false, text: first)]
+        let reply = OfflineProvider.reply(notes: notes, history: history, question: "Why do you say so?")
+        XCTAssertTrue(reply.contains("stores DNA"), reply)
+    }
 }
