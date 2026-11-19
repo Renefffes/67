@@ -306,7 +306,8 @@ struct OfflineProvider: StudyAIProvider {
 
     /// Whole numbers as written, so "9.82" is not "9.81" and "40" is not "-40"; the dash in "1939-1945" is a range, not a sign.
     private static func numbers(in text: String) -> Set<String> {
-        Set(text.matches(of: /-?[0-9]+(?:\.[0-9]+)?/).map { match in
+        let text = text.replacingOccurrences(of: "\u{2212}", with: "-")
+        return Set(text.matches(of: /-?[0-9]+(?:\.[0-9]+)?/).map { match in
             let afterDigit = match.range.lowerBound > text.startIndex && text[text.index(before: match.range.lowerBound)].isNumber
             return String(afterDigit && match.output.hasPrefix("-") ? match.output.dropFirst() : match.output[...])
         })

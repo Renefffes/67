@@ -386,4 +386,10 @@ final class OfflineProviderTests: XCTestCase {
         let card = GeneratedCard(front: "Which primes follow 1?", back: "2,3, 5")
         XCTAssertTrue(OfflineProvider.grade(answer: "2, 3, 5", card: card).hasPrefix("Correct!"))
     }
+
+    func testUnicodeMinusIsANegativeNumber() {
+        let card = GeneratedCard(front: "Where do the scales meet?", back: "\u{2212}40 degrees")
+        XCTAssertTrue(OfflineProvider.grade(answer: "-40 degrees", card: card).hasPrefix("Correct!"))
+        XCTAssertFalse(OfflineProvider.grade(answer: "40 degrees", card: card).hasPrefix("Correct!"))
+    }
 }
