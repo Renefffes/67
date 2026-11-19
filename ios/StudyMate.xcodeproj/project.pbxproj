@@ -1,0 +1,629 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1102D51F1574DD0A59FB9BC1 /* DeckDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7A9101CAECBDB49BBD8670 /* DeckDetailView.swift */; };
+		170B902B01AD1D1C8D566DA5 /* OfflineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6260F6ECA9B821840CC3DC3B /* OfflineProvider.swift */; };
+		4C79CEC1BE35A36D15B17BA8 /* StudyAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FC2C89D5C2AC5812B56161D /* StudyAI.swift */; };
+		4F1D2E234B449DAC246DE497 /* DeckListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F7FEC56DF882386F45071D /* DeckListView.swift */; };
+		53CD7DDC20AF3EE0A93E7199 /* AppleIntelligenceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E449E0C971A9D7918EFCCD3E /* AppleIntelligenceProvider.swift */; };
+		5B7839943F49D746B250B216 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0E2A2081D68D183710F4B0E /* SettingsView.swift */; };
+		5C3187199F9B3117DE65E866 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95D19ACEA03A47464869A095 /* Keychain.swift */; };
+		6B0A913874EF43965FFD6951 /* StudyMateApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54D1BC697E9E2C300B853536 /* StudyMateApp.swift */; };
+		797F79C3B8DD407E5A214559 /* NewDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EBB0A5B536EC5873749069 /* NewDeckView.swift */; };
+		A87FDA78F2E5866A7BAF2B73 /* OfflineProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C99C8B257A2F489FA048486 /* OfflineProviderTests.swift */; };
+		AA17C60918BD72BF4AE8E14C /* FlashcardStudyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD391DDE0B8909D585EC9653 /* FlashcardStudyView.swift */; };
+		B0C479FD4B897644D30C6BE8 /* StudyMateUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CADCD1BA6559186741266092 /* StudyMateUITests.swift */; };
+		B4B8FEFFB289B8B561F42604 /* SampleNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5CEB8DD7AEB01DC46B84D3 /* SampleNotes.swift */; };
+		BA727F2FD2512B1903B1BB3D /* TutorChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB48BB3551B2473690A368CC /* TutorChatView.swift */; };
+		C4D6C40D95120C4F886916A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 691BE9254CAD21445CE5AED9 /* Assets.xcassets */; };
+		C5193E3801A188EEF1B7C183 /* GeminiProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BB41860F4FB005F22DD575 /* GeminiProvider.swift */; };
+		CEEE2109FE8D8C767A6EE0D5 /* QuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E17EAEEB1F324B2E34ADF79 /* QuizView.swift */; };
+		D1BB4CD522BB40D23B084C8F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833AD6BD4B1888E32343CC52 /* Models.swift */; };
+		E4C92D61AD4D53B2F754901F /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB4B32FDF31ED0CCFFA96D8 /* TextRecognizer.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4A78BF67FC51390AC4F88A4C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BAF8C8399FD5C6476B76DE3B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B91AD75BE1BB569F34BAC93B;
+			remoteInfo = StudyMate;
+		};
+		A296119AEB26E616153FB648 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BAF8C8399FD5C6476B76DE3B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B91AD75BE1BB569F34BAC93B;
+			remoteInfo = StudyMate;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		2B7A9101CAECBDB49BBD8670 /* DeckDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckDetailView.swift; sourceTree = "<group>"; };
+		2E5CEB8DD7AEB01DC46B84D3 /* SampleNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleNotes.swift; sourceTree = "<group>"; };
+		37BB41860F4FB005F22DD575 /* GeminiProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiProvider.swift; sourceTree = "<group>"; };
+		38F7FEC56DF882386F45071D /* DeckListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckListView.swift; sourceTree = "<group>"; };
+		4BB4B32FDF31ED0CCFFA96D8 /* TextRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRecognizer.swift; sourceTree = "<group>"; };
+		54D1BC697E9E2C300B853536 /* StudyMateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyMateApp.swift; sourceTree = "<group>"; };
+		5C99C8B257A2F489FA048486 /* OfflineProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineProviderTests.swift; sourceTree = "<group>"; };
+		5E17EAEEB1F324B2E34ADF79 /* QuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizView.swift; sourceTree = "<group>"; };
+		6260F6ECA9B821840CC3DC3B /* OfflineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineProvider.swift; sourceTree = "<group>"; };
+		64EBB0A5B536EC5873749069 /* NewDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewDeckView.swift; sourceTree = "<group>"; };
+		691BE9254CAD21445CE5AED9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		759B61F7A313B665310465F3 /* StudyMate.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StudyMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7677F2899B1AA987298EEBD7 /* StudyMateUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StudyMateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7FC2C89D5C2AC5812B56161D /* StudyAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyAI.swift; sourceTree = "<group>"; };
+		833AD6BD4B1888E32343CC52 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		882861E78DDF57DEDB4D9F60 /* StudyMateTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StudyMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		95D19ACEA03A47464869A095 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		AB48BB3551B2473690A368CC /* TutorChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorChatView.swift; sourceTree = "<group>"; };
+		BD391DDE0B8909D585EC9653 /* FlashcardStudyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashcardStudyView.swift; sourceTree = "<group>"; };
+		CADCD1BA6559186741266092 /* StudyMateUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyMateUITests.swift; sourceTree = "<group>"; };
+		E449E0C971A9D7918EFCCD3E /* AppleIntelligenceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceProvider.swift; sourceTree = "<group>"; };
+		F0E2A2081D68D183710F4B0E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0BF2F89E3FCC9E8343010E04 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				833AD6BD4B1888E32343CC52 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		119C2B9941AB65C9BBED6438 = {
+			isa = PBXGroup;
+			children = (
+				DC9AC4D2466119D17CD75F1D /* StudyMate */,
+				618D15908F8F2A80327C184A /* StudyMateTests */,
+				DA9B8DF59284DA002F05C4BE /* StudyMateUITests */,
+				ADFD37962A34237F115E5D4E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5C0A2EB5E4BE814924BC585B /* App */ = {
+			isa = PBXGroup;
+			children = (
+				54D1BC697E9E2C300B853536 /* StudyMateApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		618D15908F8F2A80327C184A /* StudyMateTests */ = {
+			isa = PBXGroup;
+			children = (
+				5C99C8B257A2F489FA048486 /* OfflineProviderTests.swift */,
+			);
+			path = StudyMateTests;
+			sourceTree = "<group>";
+		};
+		75E1D3D001BCA8FD43ABF744 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				E449E0C971A9D7918EFCCD3E /* AppleIntelligenceProvider.swift */,
+				37BB41860F4FB005F22DD575 /* GeminiProvider.swift */,
+				6260F6ECA9B821840CC3DC3B /* OfflineProvider.swift */,
+				7FC2C89D5C2AC5812B56161D /* StudyAI.swift */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		ADB2566D2F5E234B13631B08 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				95D19ACEA03A47464869A095 /* Keychain.swift */,
+				2E5CEB8DD7AEB01DC46B84D3 /* SampleNotes.swift */,
+				4BB4B32FDF31ED0CCFFA96D8 /* TextRecognizer.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		ADFD37962A34237F115E5D4E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				759B61F7A313B665310465F3 /* StudyMate.app */,
+				882861E78DDF57DEDB4D9F60 /* StudyMateTests.xctest */,
+				7677F2899B1AA987298EEBD7 /* StudyMateUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DA9B8DF59284DA002F05C4BE /* StudyMateUITests */ = {
+			isa = PBXGroup;
+			children = (
+				CADCD1BA6559186741266092 /* StudyMateUITests.swift */,
+			);
+			path = StudyMateUITests;
+			sourceTree = "<group>";
+		};
+		DC9AC4D2466119D17CD75F1D /* StudyMate */ = {
+			isa = PBXGroup;
+			children = (
+				691BE9254CAD21445CE5AED9 /* Assets.xcassets */,
+				75E1D3D001BCA8FD43ABF744 /* AI */,
+				5C0A2EB5E4BE814924BC585B /* App */,
+				0BF2F89E3FCC9E8343010E04 /* Models */,
+				ADB2566D2F5E234B13631B08 /* Services */,
+				F7E08D52D62C1E4C82F0BBE7 /* Views */,
+			);
+			path = StudyMate;
+			sourceTree = "<group>";
+		};
+		F7E08D52D62C1E4C82F0BBE7 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2B7A9101CAECBDB49BBD8670 /* DeckDetailView.swift */,
+				38F7FEC56DF882386F45071D /* DeckListView.swift */,
+				BD391DDE0B8909D585EC9653 /* FlashcardStudyView.swift */,
+				64EBB0A5B536EC5873749069 /* NewDeckView.swift */,
+				5E17EAEEB1F324B2E34ADF79 /* QuizView.swift */,
+				F0E2A2081D68D183710F4B0E /* SettingsView.swift */,
+				AB48BB3551B2473690A368CC /* TutorChatView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B91AD75BE1BB569F34BAC93B /* StudyMate */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 54A93B41A4B7A69346E9D5B7 /* Build configuration list for PBXNativeTarget "StudyMate" */;
+			buildPhases = (
+				18718F2D85BBA41A97993BAB /* Sources */,
+				139CBDE52DC6EA17C39FF8F5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StudyMate;
+			packageProductDependencies = (
+			);
+			productName = StudyMate;
+			productReference = 759B61F7A313B665310465F3 /* StudyMate.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D7B2752CD6AF1D0CA536D474 /* StudyMateUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 796453017EB332A28FA9F750 /* Build configuration list for PBXNativeTarget "StudyMateUITests" */;
+			buildPhases = (
+				FEF689EB62CFA1627463CE06 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C86FE97248C672772B9AF769 /* PBXTargetDependency */,
+			);
+			name = StudyMateUITests;
+			packageProductDependencies = (
+			);
+			productName = StudyMateUITests;
+			productReference = 7677F2899B1AA987298EEBD7 /* StudyMateUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		DBC804C82C4E9166AB31A77D /* StudyMateTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA69CCC28FFEA2DFDA341A3C /* Build configuration list for PBXNativeTarget "StudyMateTests" */;
+			buildPhases = (
+				581F0D8569A120AE88DD994F /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8415E2277E13B3C883A48C06 /* PBXTargetDependency */,
+			);
+			name = StudyMateTests;
+			packageProductDependencies = (
+			);
+			productName = StudyMateTests;
+			productReference = 882861E78DDF57DEDB4D9F60 /* StudyMateTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BAF8C8399FD5C6476B76DE3B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					B91AD75BE1BB569F34BAC93B = {
+						ProvisioningStyle = Automatic;
+					};
+					D7B2752CD6AF1D0CA536D474 = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = B91AD75BE1BB569F34BAC93B;
+					};
+					DBC804C82C4E9166AB31A77D = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 5954B01E9D1244F82B75F363 /* Build configuration list for PBXProject "StudyMate" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 119C2B9941AB65C9BBED6438;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = ADFD37962A34237F115E5D4E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B91AD75BE1BB569F34BAC93B /* StudyMate */,
+				DBC804C82C4E9166AB31A77D /* StudyMateTests */,
+				D7B2752CD6AF1D0CA536D474 /* StudyMateUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		139CBDE52DC6EA17C39FF8F5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4D6C40D95120C4F886916A0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		18718F2D85BBA41A97993BAB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53CD7DDC20AF3EE0A93E7199 /* AppleIntelligenceProvider.swift in Sources */,
+				1102D51F1574DD0A59FB9BC1 /* DeckDetailView.swift in Sources */,
+				4F1D2E234B449DAC246DE497 /* DeckListView.swift in Sources */,
+				AA17C60918BD72BF4AE8E14C /* FlashcardStudyView.swift in Sources */,
+				C5193E3801A188EEF1B7C183 /* GeminiProvider.swift in Sources */,
+				5C3187199F9B3117DE65E866 /* Keychain.swift in Sources */,
+				D1BB4CD522BB40D23B084C8F /* Models.swift in Sources */,
+				797F79C3B8DD407E5A214559 /* NewDeckView.swift in Sources */,
+				170B902B01AD1D1C8D566DA5 /* OfflineProvider.swift in Sources */,
+				CEEE2109FE8D8C767A6EE0D5 /* QuizView.swift in Sources */,
+				B4B8FEFFB289B8B561F42604 /* SampleNotes.swift in Sources */,
+				5B7839943F49D746B250B216 /* SettingsView.swift in Sources */,
+				4C79CEC1BE35A36D15B17BA8 /* StudyAI.swift in Sources */,
+				6B0A913874EF43965FFD6951 /* StudyMateApp.swift in Sources */,
+				E4C92D61AD4D53B2F754901F /* TextRecognizer.swift in Sources */,
+				BA727F2FD2512B1903B1BB3D /* TutorChatView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		581F0D8569A120AE88DD994F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A87FDA78F2E5866A7BAF2B73 /* OfflineProviderTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FEF689EB62CFA1627463CE06 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0C479FD4B897644D30C6BE8 /* StudyMateUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8415E2277E13B3C883A48C06 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B91AD75BE1BB569F34BAC93B /* StudyMate */;
+			targetProxy = 4A78BF67FC51390AC4F88A4C /* PBXContainerItemProxy */;
+		};
+		C86FE97248C672772B9AF769 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B91AD75BE1BB569F34BAC93B /* StudyMate */;
+			targetProxy = A296119AEB26E616153FB648 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0EF730910B8ADA00E08A7763 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.renefffes.studymate.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StudyMate.app/StudyMate";
+			};
+			name = Debug;
+		};
+		1EAB7C20BF7B5F306AA3B1D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		27EFA578A4BE20198B8AD1C4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = StudyMate;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSCameraUsageDescription = "StudyMate uses the camera to scan your handwritten or printed notes.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "StudyMate reads photos of your notes to turn them into flashcards.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.renefffes.studymate;
+				PRODUCT_NAME = StudyMate;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3E55F4C1BA40C838D53B6369 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.renefffes.studymate.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = StudyMate;
+			};
+			name = Debug;
+		};
+		A0E4265C23DD871D885473ED /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.renefffes.studymate.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StudyMate.app/StudyMate";
+			};
+			name = Release;
+		};
+		AF4ADC2F23B8C7E148AFD444 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B14F261A92EB2F953945FD7C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = StudyMate;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSCameraUsageDescription = "StudyMate uses the camera to scan your handwritten or printed notes.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "StudyMate reads photos of your notes to turn them into flashcards.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.renefffes.studymate;
+				PRODUCT_NAME = StudyMate;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E335F6DC99F36379E6E16CEB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.renefffes.studymate.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = StudyMate;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		54A93B41A4B7A69346E9D5B7 /* Build configuration list for PBXNativeTarget "StudyMate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				27EFA578A4BE20198B8AD1C4 /* Debug */,
+				B14F261A92EB2F953945FD7C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5954B01E9D1244F82B75F363 /* Build configuration list for PBXProject "StudyMate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1EAB7C20BF7B5F306AA3B1D8 /* Debug */,
+				AF4ADC2F23B8C7E148AFD444 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		796453017EB332A28FA9F750 /* Build configuration list for PBXNativeTarget "StudyMateUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E55F4C1BA40C838D53B6369 /* Debug */,
+				E335F6DC99F36379E6E16CEB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AA69CCC28FFEA2DFDA341A3C /* Build configuration list for PBXNativeTarget "StudyMateTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0EF730910B8ADA00E08A7763 /* Debug */,
+				A0E4265C23DD871D885473ED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BAF8C8399FD5C6476B76DE3B /* Project object */;
+}
